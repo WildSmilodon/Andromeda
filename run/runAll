@@ -1,0 +1,22 @@
+#!/bin/bash
+
+#cd laplace
+
+echo "Working on:"
+
+for dir in ./laplace/*/     # list directories in the form "/tmp/dirname/"
+
+do
+  cd $dir
+  echo "$dir"
+  ../../../bin/Andromeda 
+  cd ../..
+done
+
+for dir in ./stokes/*/     # list directories in the form "/tmp/dirname/"
+do
+  cd $dir
+  echo "$dir"
+  ../../../bin/Andromeda 
+  cd ../..
+done

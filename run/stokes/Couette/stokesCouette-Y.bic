@@ -1,0 +1,110 @@
+#
+#  Andromeda BiC file
+#
+
+#
+# first enter number of equations and the name of each
+#
+EQUATIONS 3
+X
+Y
+Z
+
+#
+# Define subdomains (sdName, diff,  followed by list of walls)
+#
+SUBDOMAINS 1
+sdFluid 1.0 front back left right bottom top
+
+
+#
+# boundary conditions
+#
+# BOUNDARY eq.name function/flux const/lin/qud
+
+BOUNDARY X front function const
+0.0
+BOUNDARY X back function const
+0.0
+BOUNDARY X top function const
+0.0
+BOUNDARY X bottom function const
+0.0
+BOUNDARY X left function const
+0.0
+BOUNDARY X right function const
+0.0
+
+BOUNDARY Y front function lin
+0.0 1.0 0.0 0.0
+BOUNDARY Y back function lin
+0.0 1.0 0.0 0.0
+BOUNDARY Y top function lin
+0.0 1.0 0.0 0.0
+BOUNDARY Y bottom function lin
+0.0 1.0 0.0 0.0
+BOUNDARY Y left function const
+0.0
+BOUNDARY Y right function const
+1.0
+
+
+BOUNDARY Z front function const
+0.0
+BOUNDARY Z back function const
+0.0
+BOUNDARY Z top function const
+0.0
+BOUNDARY Z bottom function const
+0.0
+BOUNDARY Z left function const
+0.0
+BOUNDARY Z right function const
+0.0
+
+
+#
+# initial conditions
+#
+# INITIAL eq.name wallName function/flux const/lin/qud
+
+#INITIAL temperatura front function const
+#0.5
+
+#
+# SOLVER definition
+#
+SOLVER X 0 2 2 500 5 1.0E-7
+SOLVER Y 0 2 2 500 5 1.0E-7
+SOLVER Z 0 2 2 500 5 1.0E-7
+
+
+#
+# CORNER and EDGE nodes
+#
+# EDGE eq.name wall1 wall2 TargetWall
+EDGE sdFluid top back back
+EDGE sdFluid top front front
+EDGE sdFluid top right right
+EDGE sdFluid top left left
+
+EDGE sdFluid bottom back back
+EDGE sdFluid bottom front front
+EDGE sdFluid bottom right right
+EDGE sdFluid bottom left left
+
+EDGE sdFluid front left left
+EDGE sdFluid front right right
+EDGE sdFluid back left left
+EDGE sdFluid back right right
+
+
+CORNER sdFluid top front left left
+CORNER sdFluid top front right right
+CORNER sdFluid top back left left
+CORNER sdFluid top back left left
+
+CORNER sdFluid bottom front left left
+CORNER sdFluid bottom front right right
+CORNER sdFluid bottom back left left
+CORNER sdFluid bottom back left left

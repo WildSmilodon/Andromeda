@@ -1,0 +1,84 @@
+#
+#  Andromeda BiC file
+#
+
+#
+# first enter number of equations and the name of each
+#
+EQUATIONS 1
+temperatura
+
+#
+# Analytic solution results
+# u at contact12 = 34/13 = 2.615384
+# u at contact23 = 66/39 = 1.692307
+#
+
+
+#
+# Define subdomains (sdName, diff,  followed by list of walls)
+#
+SUBDOMAINS 3
+sdEna 2.0 in1 contact12 wall1
+sdDva 3.0 contact12 contact23 wall2
+sdTri 4.0 in3 contact23 wall3
+
+#
+# Flip normal orientation
+# SD name, WALL name, factor (-1.0)
+NORMMUL sdEna contact12 -1.0
+NORMMUL sdTri contact23 -1.0
+
+#
+# boundary conditions
+#
+# BOUNDARY eq.name wall function/flux/contact const/lin/qud
+
+BOUNDARY temperatura in1 function const
+4.0
+BOUNDARY temperatura wall1 flux const
+0.0
+BOUNDARY temperatura wall2 flux const
+0.0
+BOUNDARY temperatura wall3 flux const
+0.0
+BOUNDARY temperatura in3 function const
+1.0
+BOUNDARY temperatura contact12 contact const
+0.0
+BOUNDARY temperatura contact23 contact const
+0.0
+
+#
+# initial conditions
+#
+# INITIAL eq.name wallName function/flux const/lin/qud
+
+#INITIAL temperatura stena function lin
+#1.0 0.0 0.0 -1.0
+
+INITIAL temperatura wall1 function const 
+-3.3
+INITIAL temperatura wall2 function const 
+1.3
+INITIAL temperatura wall2 flux const 
+1.0
+
+
+#
+# CORNER and EDGE nodes
+#
+# EDGE sdName wall1 wall2 TargetWall
+EDGE sdEna in1 wall1 in1
+EDGE sdEna wall1 contact12 contact12
+
+EDGE sdDva wall2 contact12 contact12
+EDGE sdDva wall2 contact23 contact23
+
+EDGE sdTri in3 wall3 in3
+EDGE sdTri wall3 contact23 contact23
+
+#
+# SOLVER definition
+#
+SOLVER temperatura 0 2 2 5000 5 1.0E-15

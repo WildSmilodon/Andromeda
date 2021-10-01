@@ -1,0 +1,41 @@
+
+  Version history:
+  
+  - 0.1   :  set up mesh
+  - 0.2   :  gmsh tri and quad mesh imported, element size calculated
+             BEM Laplace solver works, Paraview export of results in VTU
+  - 0.3   :  renamed export filenames
+             added calculation of results inside of the domain
+             added mesh transform
+  - 0.4   :  export for stochastic postpostprocessing.
+             cylinder mesh transform, mesh extents info in log file
+             
+  - 0.5   :  subdomains, separate
+  
+  - 0.6   :  subdomains, redefinition 
+             work on connected. Pazi: za quad elemente ne dela, ker treba zasukati normalo v integraciji
+             write and.integrals.bin
+             
+  - 0.7   :  lsqr solver + CRS zapis matrik, iContact works for triangle meshes
+             export to regions (OREG keyword)
+             
+  - 0.8   :  sysM in rhsM zgolj v CRS formatu
+             line export (PPLI) (works for tiangualar meshes only!!)
+             export of restart file in binary format (bin.rst)
+             postprocessing only run (POST Yes)
+             
+  - 0.9   :  subdomains for hexa meshes
+             lsqr solver with INT(8) nnz size   
+             domain value calculation for subdomains (DPLE)  
+             
+  - 1.0   :  COME keyword, assemble SYSm and RHSm from hard disk to save memory    
+  
+  - 1.1   :  REAL(8) -> REAL, use -fdefault-REAL-8 in Makefile              
+
+  - 1.2   :  REAL -> REAL(rk), added mCommon, added support for v4 gmsh *.msh files
+             added Stokes flow solver
+
+  - 1.3   :  odpravil bug pri CRS, Stokes pressure solver, 
+             dodal tlak v zapis integralov, izpis v Paraview
+
+  - 1.4   :  first git commit, refactoring

@@ -1,0 +1,93 @@
+#
+#  Andromeda BiC file
+#
+
+#
+# first enter number of equations and the name of each
+#
+EQUATIONS 2
+temperatura
+koncentracija
+
+#
+# Define subdomains (sdName, diff,  followed by list of walls)
+#
+SUBDOMAINS 1
+sdEna 1.0 spredaj zadaj levo desno spodaj zgoraj
+
+#
+# boundary conditions
+#
+# BOUNDARY eq.name function/flux const/lin/qud
+
+BOUNDARY temperatura spredaj flux const
+0.0
+BOUNDARY temperatura zadaj flux const
+0.0
+BOUNDARY temperatura zgoraj flux const
+0.0
+BOUNDARY temperatura spodaj flux const
+0.0
+BOUNDARY temperatura levo function const
+-0.5
+BOUNDARY temperatura desno function const
+0.5
+
+BOUNDARY koncentracija spredaj function const
+1.0
+BOUNDARY koncentracija zadaj function const
+3.0
+BOUNDARY koncentracija zgoraj flux const
+0.0
+BOUNDARY koncentracija spodaj flux const
+0.0
+BOUNDARY koncentracija levo flux const
+0.0
+BOUNDARY koncentracija desno flux const
+0.0
+
+
+
+#
+# initial conditions
+#
+# INITIAL eq.name wallName function/flux const/lin/qud
+
+INITIAL temperatura spredaj function const
+0.5
+
+#
+# SOLVER definition
+#
+SOLVER temperatura 0 2 2 500 5 1.0E-15
+SOLVER koncentracija 0 2 2 500 5 1.0E-15
+
+#
+# CORNER and EDGE nodes
+#
+# EDGE eq.name wall1 wall2 TargetWall
+EDGE sdEna zgoraj zadaj zadaj
+EDGE sdEna zgoraj spredaj spredaj
+EDGE sdEna zgoraj desno desno
+EDGE sdEna zgoraj levo levo
+
+EDGE sdEna spodaj zadaj zadaj
+EDGE sdEna spodaj spredaj spredaj
+EDGE sdEna spodaj desno desno
+EDGE sdEna spodaj levo levo
+
+EDGE sdEna spredaj levo levo
+EDGE sdEna spredaj desno desno
+EDGE sdEna zadaj levo levo
+EDGE sdEna zadaj desno desno
+
+
+CORNER sdEna zgoraj spredaj levo levo
+CORNER sdEna zgoraj spredaj desno desno
+CORNER sdEna zgoraj zadaj levo levo
+CORNER sdEna zgoraj zadaj levo levo
+
+CORNER sdEna spodaj spredaj levo levo
+CORNER sdEna spodaj spredaj desno desno
+CORNER sdEna spodaj zadaj levo levo
+CORNER sdEna spodaj zadaj levo levo
