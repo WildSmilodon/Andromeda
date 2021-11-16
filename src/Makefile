@@ -1,5 +1,5 @@
 PROGRAM = Andromeda
-VERSION = 1.3
+VERSION = 1.4
 
 MODOBJECTS = mod_common.o mod_mesh.o mod_trikotnik.o mod_gauss.o mod_par.o mod_eqns.o mod_profile.o
 OBJECTSFIX = lib_lsqr.o lib_solveFM.o 
