@@ -10,7 +10,7 @@ Installation & test:
 
 sudo apt install gfortran make libblas-dev liblapack-dev<br>
 git clone https://github.com/WildSmilodon/Andromeda.git<br>
-cd src<br>
+cd Andromeda/src<br>
 make<br>
 cd ../run<br>
 ./runAll<br>
