@@ -9,46 +9,25 @@ INST = $(HOME)/bin
 LINS = ../bin
 HOST = $(shell hostname)
 
+# compiler
+FC = gfortran
 
-# hobbit.uni-mb.si (Intel fortran)
-#-------
+# Debug version    
+#OPT = -g -fbounds-check -Wall -fcheck=all
+#OPDE= d
+# Optimized version
+OPT = -O3
+OPDE= o  
+
+# options
+FCOPTS = -ffixed-line-length-132  -fcray-pointer 
+
+# Blas library
+
 ifneq (,$(findstring hobbit,$(HOST)))
-#    FC = mpif90
-    FC = gfortran
-    KON =
-# Debug version    
-#   OPT = -g -fbounds-check -Wall -fcheck=all
-#   OPDE= d
-
-# Optimized version
-    OPT = -O3
-    OPDE= o  
-
-FCOPTS = -ffixed-line-length-132  -fcray-pointer 
-LDOPTO = /usr/lib/libblas.so
-
-endif
-
-ifneq (,$(findstring HOGAR,$(HOST)))
-#    FC = mpif90
-    FC = gfortran
-    KON =
-# Debug version    
-#   OPT = -g -fbounds-check -Wall -fcheck=all
-   #OPT = -g -C -fbacktrace -fcheck=all -ffpe-trap=all --warn-all --warn-no-unused
-#   OPT = -g -C -fbacktrace -fcheck=all -ffpe-trap=denormal,zero,overflow,invalid
-
-
-#   OPDE= d
-
-# Optimized version
-    OPT = -O3
-    OPDE= o  
-
-FCOPTS = -ffixed-line-length-132  -fcray-pointer 
-LDOPTO = /usr/lib/x86_64-linux-gnu/blas/libblas.so
-
-
+  LDOPTO = /usr/lib/libblas.so
+else
+  LDOPTO = /usr/lib/x86_64-linux-gnu/blas/libblas.so
 endif
 
 
@@ -74,7 +53,7 @@ $(MODOBJECTS): %.o: %.f90
 
 
 install:
-	cp $(LINS)/$(PROGRAM) $(INST)/$(PROGRAM)-$(VERSION)-$(OPDE)$(KON)
+	cp $(LINS)/$(PROGRAM) $(INST)/$(PROGRAM)-$(VERSION)-$(OPDE)
 	 
 #
 # Instalacija BLAS in LAPAC knjiznic
