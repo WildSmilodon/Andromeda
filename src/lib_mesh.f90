@@ -815,7 +815,7 @@ SUBROUTINE VerifyElementNormal(e)
   !cp mag check is so that the outer sphere boundary does not
   !interfere with particle boundary
   !logic is: particle size is << 10, boundary sphere size is >> 10)
-  IF ( dp .LT. 0.0D0 .AND. cpmag .LT. 10.0D0 ) THEN
+  IF ( dp .LT. 0.0_rk .AND. cpmag .LT. 10.0_rk ) THEN
     PRINT *, "Normal wrong, turning around"
     stop
   !  e%normal(1) = -e%normal(1)
@@ -955,7 +955,7 @@ SUBROUTINE CalFunctionIntegralWalls(u,name)
 !     Calculate wall area
 !
       DO j=1,nofw
-        wall(j)%area = 0.0
+        wall(j)%area = 0.0_rk
         DO i=1,nelem
           IF (element(i)%bcid.EQ.wall(j)%id) THEN
             wall(j)%area = wall(j)%area + element(i)%area
@@ -1495,18 +1495,18 @@ END SUBROUTINE
         DO i=1,nofw
           eqn(j)%boundary(i)%known     = iFlux
           eqn(j)%boundary(i)%type      = iConst
-          eqn(j)%boundary(i)%params(1) = 0.0
+          eqn(j)%boundary(i)%params(1) = 0.0_rk
 
           eqn(j)%initial(i)%known     = iFunction
           eqn(j)%initial(i)%Type      = iConst
-          eqn(j)%initial(i)%params(1) = 0.0
+          eqn(j)%initial(i)%params(1) = 0.0_rk
         END DO
         eqn(j)%slv%type=0
         eqn(j)%slv%pret=2
         eqn(j)%slv%prep=2
         eqn(j)%slv%maxit=500
         eqn(j)%slv%stopt=5
-        eqn(j)%slv%eps=1.0E-15
+        eqn(j)%slv%eps=1.0E-15_rk
       END DO
 
 
@@ -1672,18 +1672,18 @@ END SUBROUTINE
         DO i=1,nofw
           eqn(j)%boundary(i)%known     = iFlux
           eqn(j)%boundary(i)%type      = iConst
-          eqn(j)%boundary(i)%params(1) = 0.0
+          eqn(j)%boundary(i)%params(1) = 0.0_rk
 
           eqn(j)%initial(i)%known     = iFunction
           eqn(j)%initial(i)%Type      = iConst
-          eqn(j)%initial(i)%params(1) = 0.0
+          eqn(j)%initial(i)%params(1) = 0.0_rk
         END DO
         eqn(j)%slv%type=0
         eqn(j)%slv%pret=2
         eqn(j)%slv%prep=2
         eqn(j)%slv%maxit=500
         eqn(j)%slv%stopt=5
-        eqn(j)%slv%eps=1.0E-15
+        eqn(j)%slv%eps=1.0E-15_rk
       END DO
 !
 !     Read BiC file

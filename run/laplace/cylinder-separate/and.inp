@@ -1,0 +1,39 @@
+#
+# Andromeda input file
+#
+
+# Mesh & BiC file folder
+MDIR ./
+
+# Mesh file
+LGEO ../../mesh/cyl-01-sep.msh
+
+# BiC file
+LBIC cyl-2sd-sep-prevod.bic
+
+# Triangle integration (1,3,5),No.recursion
+ITRI 5 20
+# Qudarilateral integration (reg: 1..8), (sing:1..8)
+IQUD 4 4
+
+# Output results for stochastic postprocessing (and.stochastic.txt)
+OSTO No
+# Output initial distribution of function and flux (and.initial.vtu)
+OINI Yes
+# Output results in Paraview format (and.results.vtu)
+OMSH Yes
+
+
+
+# Transfrom mesh
+#MTST 5.0 2.0 1.0
+
+# Transform mesh - cylinder case for TES project
+# d_old D_old L_old d_new D_new L_new
+#MTCY 0.8 2.0 10.0 0.5 1.6 4.3
+
+# Screen output
+SCRO No
+
+# Write integrals to disk
+WINT No

@@ -1,0 +1,85 @@
+#
+#  Andromeda BiC file
+#
+
+#
+# first enter number of equations and the name of each
+#
+EQUATIONS 1
+temperatura
+
+#
+# Define subdomains (sdName, diff,  followed by list of walls)
+#
+SUBDOMAINS 1
+sdFluid 1.0 inlet outlet top bottom front back krogla 
+
+#
+# Flip normal orientation
+# SD name, WALL name, factor (-1.0)
+NORMMUL sdFluid krogla -1.0
+
+#
+# boundary conditions
+#
+# BOUNDARY eq.name wallName function/flux/contact const/lin/qud
+
+BOUNDARY temperatura inlet function const
+1.0
+BOUNDARY temperatura outlet function const
+3.0
+BOUNDARY temperatura top flux const
+0.0
+BOUNDARY temperatura bottom flux const
+0.0
+BOUNDARY temperatura front flux const
+0.0
+BOUNDARY temperatura back flux const
+0.0
+BOUNDARY temperatura krogla function const
+2.0
+
+#
+# initial conditions
+#
+# INITIAL eq.name wallName function/flux const/lin/qud
+
+#INITIAL temperatura ?? function lin
+#1.0 0.0 0.0 -1.0
+
+#INITIAL temperatura ?? function const 
+#0.0
+
+
+#
+# CORNER and EDGE nodes
+#
+# EDGE sdName wall1 wall2 TargetWall
+EDGE sdFluid inlet top top
+EDGE sdFluid inlet bottom bottom
+EDGE sdFluid inlet front front
+EDGE sdFluid inlet back back
+
+EDGE sdFluid outlet top top
+EDGE sdFluid outlet bottom bottom
+EDGE sdFluid outlet front front
+EDGE sdFluid outlet back back
+
+EDGE sdFluid top front top
+EDGE sdFluid top back top
+EDGE sdFluid bottom front bottom
+EDGE sdFluid bottom front bottom
+
+CORNER sdFluid inlet bottom front bottom
+CORNER sdFluid inlet bottom back bottom
+CORNER sdFluid inlet top front top
+CORNER sdFluid inlet top back top
+
+CORNER sdFluid outlet bottom front bottom
+CORNER sdFluid outlet bottom back bottom
+CORNER sdFluid outlet top front top
+CORNER sdFluid outlet top back top
+#
+# SOLVER definition
+#
+SOLVER temperatura 0 2 2 5000 5 1.0E-15

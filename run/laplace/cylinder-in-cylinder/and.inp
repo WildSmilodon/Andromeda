@@ -1,0 +1,38 @@
+#
+# Andromeda input file
+#
+
+# Mesh & BiC file folder
+MDIR ./
+
+# Mesh file
+
+LGEO ../../mesh/cyl-in-cyl-05.msh
+#LGEO ../../mesh/cyl-in-cyl-01.msh
+#LGEO ../../mesh/cyl-in-cyl-005.msh
+
+# BiC file
+LBIC cyl-in-cyl.bic
+
+
+
+# Triangle integration (1,3,5),No.recursion
+ITRI 5 20
+# Qudarilateral integration (reg: 1..8), (sing:1..8)
+IQUD 4 4
+
+# Output results for stochastic postprocessing (and.stochastic.txt)
+OSTO No
+# Output initial distribution of function and flux (and.initial.vtu)
+OINI Yes
+# Output results in Paraview format (and.results.vtu)
+OMSH Yes
+
+# Write integrals file (Default = Yes)
+WINT No
+
+
+
+# Screen output
+SCRO No
+

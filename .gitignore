@@ -39,3 +39,5 @@
 *.rst
 *.log
 *.txt
+*.bin
+navodila-git

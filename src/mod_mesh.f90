@@ -155,7 +155,7 @@
       DO i=1,nelem
         element(i)%type = -1
         element(i)%nno  = -1
-        element(i)%area  = 0.0
+        element(i)%area  = 0.0_rk
       END DO
 
       END SUBROUTINE

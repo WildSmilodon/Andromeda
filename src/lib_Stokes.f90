@@ -996,7 +996,7 @@ subroutine sdFormIntegralMatricesStokes()
     ALLOCATE (rowprTx(nnodes), rowprTy(nnodes), rowprTz(nnodes))
     ALLOCATE (rowprGx(nqnodes),rowprGy(nqnodes),rowprGz(nqnodes))
   
-    ura0=cptime(0.0)
+    ura0=cptime(0.0_rk)
     
 !
 !   Loop over subdomains

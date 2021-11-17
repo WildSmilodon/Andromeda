@@ -1,0 +1,65 @@
+#
+#  Andromeda BiC file
+#
+
+#
+# first enter number of equations and the name of each
+#
+EQUATIONS 3
+X
+Y
+Z
+
+#
+# Define subdomains (sdName, diff,  followed by list of walls)
+#
+SUBDOMAINS 1
+sdFluid 1.0 particle outside
+
+#NORMMUL sdFluid particle -1.0
+
+#
+# boundary conditions
+#
+# BOUNDARY eq.name function/flux const/lin/qud
+
+
+#
+# PARTICLE (no-slip)
+#
+BOUNDARY X particle function const
+0.0
+BOUNDARY Y particle function const
+0.0
+BOUNDARY Z particle function const
+0.0
+
+#
+# OUTSIDE (no-slip)
+#
+BOUNDARY X outside function const
+0.0
+BOUNDARY Y outside function const
+1.0
+BOUNDARY Z outside function const
+0.0
+
+#
+# initial conditions
+#
+# INITIAL eq.name wallName function/flux const/lin/qud
+
+#INITIAL temperatura front function const
+#0.5
+
+
+#
+# CORNER and EDGE nodes
+#
+# EDGE eq.name wall1 wall2 TargetWall
+
+
+#
+# SOLVER definition
+#
+SOLVER X 1 2 2 5000 5 1.0E-8

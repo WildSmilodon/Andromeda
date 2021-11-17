@@ -239,13 +239,13 @@
       ALLOCATE (rowH(nnodes))
       ALLOCATE (rowG(nqnodes))
 
-      ura0=cptime(0.0)
+      ura0=cptime(0.0_rk)
 !
 !     Loop over subdomains
 !
       DO isd=1,nosd
         row=0
-        err=0.0
+        err=0.0_rk
 
         WRITE (parLogTekst,'(A,A,A)') "working on: ",TRIM(subdomain(isd)%name)," function source points."
         CALL WriteToLog(parLogTekst)

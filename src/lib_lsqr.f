@@ -66,7 +66,7 @@ c
       wantse=.FALSE.
       extra=.FALSE.
 c
-      zero=0.0
+      zero=0.0_rk
       damp=zero
       conlim=1.0D8
 c
@@ -882,7 +882,7 @@ c     Local variables
      &                   theta, t1, t2, t3, xnorm1, z, zbar, alfopt
 
       REAL(rk)   zero,           one
-      PARAMETER        ( zero = 0.0,  one = 1.0 )
+      PARAMETER        ( zero = 0.0_rk,  one = 1.0_rk )
 
       CHARACTER*14       enter, exit
       CHARACTER*53       msg(0:5)
@@ -1141,9 +1141,9 @@ c     ------------------------------------------------------------------
       IF (itn   .LE. 10       ) GOTO 400
       IF (itn   .GE. itnlim-10) GOTO 400
       IF (MOD(itn,10) .EQ. 0  ) GOTO 400
-      IF (test3 .LE.  2.0*ctol) GOTO 400
-      IF (test2 .LE. 10.0*atol) GOTO 400
-      IF (test1 .LE. 10.0*rtol) GOTO 400
+      IF (test3 .LE.  2.0_rk*ctol) GOTO 400
+      IF (test2 .LE. 10.0_rk*atol) GOTO 400
+      IF (test1 .LE. 10.0_rk*rtol) GOTO 400
       IF (istop .NE.  0       ) GOTO 400
       GOTO 600
 
@@ -1250,7 +1250,7 @@ c **********************************************************************
       INTRINSIC         abs, sqrt
       REAL(rk)  scale
       REAL(rk)  zero
-      PARAMETER       ( zero = 0.0d+0 )
+      PARAMETER       ( zero = 0.0_rk )
 
       scale  = abs( a ) + abs( b )
       IF (scale .EQ. zero) THEN

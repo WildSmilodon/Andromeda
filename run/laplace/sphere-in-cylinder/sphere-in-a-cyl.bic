@@ -1,0 +1,59 @@
+#
+#  Andromeda BiC file
+#
+
+#
+# first enter number of equations and the name of each
+#
+EQUATIONS 1
+temperatura
+
+#
+# Define subdomains (sdName, diff,  followed by list of walls)
+#
+SUBDOMAINS 2
+sdZunaj 1.0 spredaj stena zadaj krogla 
+sdNoter 1.0 krogla
+
+#
+# Flip normal orientation
+# SD name, WALL name, factor (-1.0)
+NORMMUL sdZunaj krogla -1.0
+
+#
+# boundary conditions
+#
+# BOUNDARY eq.name wallName function/flux/contact const/lin/qud
+
+BOUNDARY temperatura spredaj function const
+3.0
+BOUNDARY temperatura stena flux const
+0.0
+BOUNDARY temperatura zadaj function const
+1.0
+BOUNDARY temperatura krogla contact const
+0.0
+
+#
+# initial conditions
+#
+# INITIAL eq.name wallName function/flux const/lin/qud
+
+#INITIAL temperatura stena function lin
+#1.0 0.0 0.0 -1.0
+
+INITIAL temperatura stena function const 
+0.0
+
+
+#
+# CORNER and EDGE nodes
+#
+# EDGE sdName wall1 wall2 TargetWall
+EDGE sdZunaj spredaj stena spredaj
+EDGE sdZunaj stena zadaj zadaj
+
+#
+# SOLVER definition
+#
+SOLVER temperatura 0 2 2 5000 5 1.0E-15

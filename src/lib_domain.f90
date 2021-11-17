@@ -82,9 +82,9 @@
       REAL(rk) res
       REAL(rk) SourcePoint(3)
 
-      SourcePoint(1)=0.0
-      SourcePoint(2)=0.0
-      SourcePoint(3)=0.5
+      SourcePoint(1)=0.0_rk
+      SourcePoint(2)=0.0_rk
+      SourcePoint(3)=0.5_rk
 
       CALL GetDomainValue(en,SourcePoint,res,ierr)
 

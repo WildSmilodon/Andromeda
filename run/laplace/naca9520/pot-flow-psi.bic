@@ -1,0 +1,88 @@
+#
+#  Andromeda BiC file
+#
+
+#
+# first enter number of equations and the name of each
+#
+EQUATIONS 1
+psi
+
+#
+# Define subdomains (sdName, diff,  followed by list of walls)
+#
+SUBDOMAINS 1
+sdFluid 1.0 inlet outlet top bottom front back aerofoil 
+
+#
+# Flip normal orientation
+# SD name, WALL name, factor (-1.0)
+NORMMUL sdFluid aerofoil -1.0
+
+#
+# boundary conditions
+#
+# BOUNDARY eq.name wallName function/flux/contact const/lin/qud
+
+BOUNDARY psi inlet function lin
+0.0 0.0 0.0 1.0
+BOUNDARY psi outlet flux const
+0.0
+BOUNDARY psi top function const
+2.0
+BOUNDARY psi bottom function const
+-2.0
+BOUNDARY psi front flux const
+0.0
+BOUNDARY psi back flux const
+0.0
+BOUNDARY psi aerofoil flux const
+0.0
+
+#
+# initial conditions
+#
+# INITIAL eq.name wallName function/flux const/lin/qud
+
+#INITIAL temperatura ?? function lin
+#1.0 0.0 0.0 -1.0
+
+#INITIAL temperatura ?? function const 
+#0.0
+
+
+#
+# CORNER and EDGE nodes
+#
+# EDGE sdName wall1 wall2 TargetWall
+EDGE sdFluid aerofoil front front
+EDGE sdFluid aerofoil back back
+
+EDGE sdFluid inlet top top
+EDGE sdFluid inlet bottom bottom
+EDGE sdFluid inlet front inlet
+EDGE sdFluid inlet back inlet
+
+EDGE sdFluid outlet top top
+EDGE sdFluid outlet bottom bottom
+EDGE sdFluid outlet front outlet
+EDGE sdFluid outlet back outlet
+
+EDGE sdFluid top front top
+EDGE sdFluid top back top
+EDGE sdFluid bottom front bottom
+EDGE sdFluid bottom front bottom
+
+CORNER sdFluid inlet bottom front bottom
+CORNER sdFluid inlet bottom back bottom
+CORNER sdFluid inlet top front top
+CORNER sdFluid inlet top back top
+
+CORNER sdFluid outlet bottom front bottom
+CORNER sdFluid outlet bottom back bottom
+CORNER sdFluid outlet top front top
+CORNER sdFluid outlet top back top
+#
+# SOLVER definition
+#
+SOLVER psi 0 2 2 5000 5 1.0E-15

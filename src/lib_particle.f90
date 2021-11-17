@@ -106,7 +106,7 @@ SUBROUTINE StokesInlet3sidesTorquePiCRS()
     !
   
     ierr=0
-    cput=0.0
+    cput=0.0_rk
     nits=0
               
       !
@@ -274,7 +274,7 @@ SUBROUTINE StokesInlet3sidesTorqueOmegaCRS()
     !
   
     ierr=0
-    cput=0.0
+    cput=0.0_rk
     nits=0
               
       !
@@ -422,7 +422,7 @@ SUBROUTINE StokesInlet3sidesForceCRS()
     !
   
     ierr=0
-    cput=0.0
+    cput=0.0_rk
     nits=0
               
       !
@@ -604,7 +604,7 @@ SUBROUTINE StokesInlet3sidesForceTorque()
     !
   
     ierr=0
-    cput=0.0
+    cput=0.0_rk
     nits=0
               
     IF (stk%slv%type.EQ.0) THEN ! 0 = direct solver         
@@ -718,7 +718,7 @@ SUBROUTINE StokesInlet3sidesForceTorque()
     !
   
     ierr=0
-    cput=0.0
+    cput=0.0_rk
     nits=0
               
     IF (stk%slv%type.EQ.0) THEN ! 0 = direct solver         
@@ -845,7 +845,7 @@ SUBROUTINE StokesInlet3sidesForceTorque()
     !
   
     ierr=0
-    cput=0.0
+    cput=0.0_rk
     nits=0
               
     IF (stk%slv%type.EQ.0) THEN ! 0 = direct solver         
@@ -975,7 +975,7 @@ SUBROUTINE StokesInlet3sidesForceTorque()
 !    !
 !  
 !    ierr=0
-!    cput=0.0
+!    cput=0.0_rk
 !    nits=0
 !              
 !    IF (stk%slv%type.EQ.0) THEN ! 0 = direct solver         
@@ -1189,7 +1189,7 @@ SUBROUTINE StokesInlet3sidesTorque()
     !
   
     ierr=0
-    cput=0.0
+    cput=0.0_rk
     nits=0
               
     IF (stk%slv%type.EQ.0) THEN ! 0 = direct solver         
@@ -1614,7 +1614,7 @@ SUBROUTINE StokesEllipsoidValidationSOLVE()
             !
           
             ierr=0
-            cput=0.0
+            cput=0.0_rk
             nits=0
                       
             IF (stk%slv%type.EQ.0) THEN ! 0 = direct solver         
@@ -1875,18 +1875,18 @@ USE mPar
 IMPLICIT NONE
 REAL(rk) lambda,ResTprime(3),l2
 
-ResTprime=0.0
-IF (lambda.LT.1.0) THEN
+ResTprime=0.0_rk
+IF (lambda.LT.1.0_rk) THEN
   CALL WriteToLog("ERROR :: CalResTensorPrime :: Particle aspect ratio < 1 !")   
-ELSE IF (lambda.EQ.1.0) THEN
-  ResTprime(1)=6.0
-  ResTprime(2)=6.0
-  ResTprime(3)=6.0
+ELSE IF (lambda.EQ.1.0_rk) THEN
+  ResTprime(1)=6.0_rk
+  ResTprime(2)=6.0_rk
+  ResTprime(3)=6.0_rk
 ELSE
-  l2=Lambda**2 - 1.0
-  ResTprime(2)=(16.0*l2**(1.5))/( (2*l2 - 1.0)*Log(Lambda + Sqrt(l2)) + Lambda*Sqrt(l2) )
+  l2=Lambda**2 - 1.0_rk
+  ResTprime(2)=(16.0_rk*l2**(1.5))/( (2*l2 - 1.0_rk)*Log(Lambda + Sqrt(l2)) + Lambda*Sqrt(l2) )
   ResTprime(3)=ResTprime(2)
-  ResTprime(1)=( 8.0*l2**(1.5))/( (2*l2 + 1.0)*Log(Lambda + Sqrt(l2)) - Lambda*Sqrt(l2) )
+  ResTprime(1)=( 8.0_rk*l2**(1.5))/( (2*l2 + 1.0_rk)*Log(Lambda + Sqrt(l2)) - Lambda*Sqrt(l2) )
 END IF
 
 END

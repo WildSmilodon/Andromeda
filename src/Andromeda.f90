@@ -129,13 +129,11 @@
 
                   IF (parSval.EQ.parYes) THEN
                         CALL WriteToLog("Solving ... Stokes validation run!") 
-                        CALL StokesEllipsoidValidationSOLVE() ! brez CRS - poporavi
+                        CALL StokesEllipsoidValidationSOLVE() 
                   END IF
                   IF (parTrii.EQ.parYes) THEN
                         CALL WriteToLog("Solving ... Stokes 3 sides inlet run!") 
-                        CALL StokesInlet3sidesForceTorque() !ok, non-CRS version
-                        !CALL StokesInlet3sidesTorque() old
-                        !CALL StokesInlet3sides() older
+                        CALL StokesInlet3sidesForceTorque() 
                   END IF
 
                   IF (parSval.EQ.parNo.AND.parTrii.EQ.parNo) THEN

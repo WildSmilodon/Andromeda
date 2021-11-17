@@ -342,9 +342,9 @@
           ELSE
               dummy = DOT_PRODUCT(line1,line2)/(NORM2(line1)*NORM2(line2))
               IF(dummy.LE.-1.0) THEN
-                  angle2lines = 3.1415926535897931
+                  angle2lines = 3.1415926535897931_rk
               ELSE IF (dummy.GE.1.0) THEN
-                  angle2lines = 0.0
+                  angle2lines = 0.0_rk
               ELSE
                   angle2lines = ACOS(DOT_PRODUCT(line1,line2)/ &
                         (NORM2(line1)*NORM2(line2)))

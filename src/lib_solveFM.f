@@ -45,7 +45,7 @@ C Internal
 C
 C Measure CPU time
 C
-      cpu0=cptime(0.)
+      cpu0=cptime(0.0_rk)
 C
 C Check for b=0
 C
@@ -130,7 +130,7 @@ c
 c
 c Measure CPU time
 c
-      cpu0=cptime(0.)
+      cpu0=cptime(0.0_rk)
 c
 c Calculate preconditioner
 c
@@ -1211,7 +1211,7 @@ C----------------------------------------------------------------------C
 *     ..
 *     .. Parameters ..
       REAL*8   ZERO, ONE
-      PARAMETER (ZERO=0.0D0, ONE=1.0D0)
+      PARAMETER (ZERO=0.0_rk, ONE=1.0_rk)
 *     ..
       LOCLEN = ipar(4)
       PRECONT = ipar(8)
@@ -2021,6 +2021,7 @@ C----------------------------------------------------------------------C
       END
 
       SUBROUTINE ENCODE(RHO,C,S)
+      USE mCommon
       IMPLICIT NONE
 *     .. Scalar Arguments ..
       DOUBLE PRECISION C,RHO,S
@@ -2030,11 +2031,11 @@ C----------------------------------------------------------------------C
 *     ..
 *     .. Parameters ..
       DOUBLE PRECISION ZERO
-      PARAMETER (ZERO=0.0D0)
+      PARAMETER (ZERO=0.0_rk)
       DOUBLE PRECISION ONE
-      PARAMETER (ONE=1.0D0)
+      PARAMETER (ONE=1.0_rk)
       DOUBLE PRECISION TWO
-      PARAMETER (TWO=2.0D0)
+      PARAMETER (TWO=2.0_rk)
 *     ..
       IF (C.EQ.ZERO) THEN
           RHO = ONE

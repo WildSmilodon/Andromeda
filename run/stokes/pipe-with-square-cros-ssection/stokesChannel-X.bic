@@ -1,0 +1,122 @@
+#
+#  Andromeda BiC file
+#
+
+#
+# first enter number of equations and the name of each
+#
+EQUATIONS 3
+X
+Y
+Z
+
+#
+# Define subdomains (sdName, diff,  followed by list of walls)
+#
+SUBDOMAINS 1
+sdFluid 1.5 front back left right bottom top
+
+
+#
+# boundary conditions
+#
+# BOUNDARY eq.name function/flux const/lin/qud
+
+
+
+#
+# INLET (known velocity)
+#
+BOUNDARY X left function const
+1.0
+BOUNDARY Y left function const
+0.0
+BOUNDARY Z left function const
+0.0
+
+#
+# OUTLET (known pressure (normal = x direction), tangential direction velocity = 0 )
+#
+BOUNDARY X right flux const
+0.0
+BOUNDARY Y right function const
+0.0
+BOUNDARY Z right function const
+0.0
+
+
+# 
+# WALLS (no-slip)
+#
+BOUNDARY X top function const
+0.0
+BOUNDARY X bottom function const
+0.0
+BOUNDARY Y top function const
+0.0
+BOUNDARY Y bottom function const
+0.0
+BOUNDARY Z top function const
+0.0
+BOUNDARY Z bottom function const
+0.0
+BOUNDARY X front function const
+0.0
+BOUNDARY X back function const
+0.0
+BOUNDARY Y front function const
+0.0
+BOUNDARY Y back function const
+0.0
+BOUNDARY Z front function const
+0.0
+BOUNDARY Z back function const
+0.0
+
+
+
+#
+# initial conditions
+#
+# INITIAL eq.name wallName function/flux const/lin/qud
+
+#INITIAL temperatura front function const
+#0.5
+
+
+#
+# CORNER and EDGE nodes
+#
+# EDGE eq.name wall1 wall2 TargetWall
+EDGE sdFluid top back top
+EDGE sdFluid top front top
+EDGE sdFluid top right top
+EDGE sdFluid top left top
+
+EDGE sdFluid bottom back bottom
+EDGE sdFluid bottom front bottom
+EDGE sdFluid bottom right bottom
+EDGE sdFluid bottom left bottom
+
+
+EDGE sdFluid front left front
+EDGE sdFluid front right front
+EDGE sdFluid back left back
+EDGE sdFluid back right back
+
+
+CORNER sdFluid top front left top
+CORNER sdFluid top front right top
+CORNER sdFluid top back left top
+CORNER sdFluid top back right top
+
+CORNER sdFluid bottom front left bottom
+CORNER sdFluid bottom front right bottom
+CORNER sdFluid bottom back left bottom
+CORNER sdFluid bottom back right bottom
+
+
+#
+# SOLVER definition
+#
+SOLVER X 1 2 2 500 5 1.0E-8

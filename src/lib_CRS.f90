@@ -68,7 +68,7 @@
 !     Solve
 !
       ierr=0
-      cput=0.0
+      cput=0.0_rk
       nits=0
 
 !

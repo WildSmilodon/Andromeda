@@ -1,0 +1,61 @@
+#
+# Andromeda input file
+#
+
+# Mesh & BiC file folder
+MDIR ./
+
+# Mesh file
+#
+# Particle in spherical geometry
+#
+LGEO ../../mesh/sphere-in-sphere-1024-1843-3678-tri.msh
+#LGEO ../../mesh/sphere-in-sphere-1024-2972-5936-tri.msh
+#LGEO ../../mesh/sphere-in-sphere-1024-2140-4272-tri.msh
+
+#
+# boundary condition
+#
+LBIC particle-in-flow.bic
+
+# Problem type
+PRTY Stokes
+
+# Validation run
+SVAL No
+
+# Triangle integration (1,3,5),No.recursion
+ITRI 5 20
+# Qudarilateral integration (reg: 1..8), (sing:1..8)
+IQUD 4 4
+
+# Output results for stochastic postprocessing (and.stochastic.txt)
+OSTO No
+# Output initial distribution of function and flux (and.initial.vtu)
+OINI Yes
+# Output results in Paraview format (and.results.vtu)
+OMSH Yes
+
+# Screen output
+SCRO No
+
+# Write integrals to disk
+WINT No
+
+# Torque calculation at walls
+TINW Yes
+
+# Transform mesh to superellipsoid
+#SUEL 2.0 1.0 1.0 1.0 1.0
+
+# 2:1:1, V=pi/6
+SUEL  0.7937005260        0.3968502630        0.3968502630         1.000000000         1.000000000
+# 5:1:1, V=pi/6
+#SUEL  1.462008869        0.2924017738        0.2924017738         1.000000000         1.00000000
+# Potato
+#SUEL 3.5 2.1 1.0 0.1 0.1
+
+# 3 inlets rest tensor calculation, stokes flow
+# l1 l2 e1 e2 
+#TRII 2.0 1.0 1.0 1.0
+#TRII 5.0 1.0 1.0 1.0
