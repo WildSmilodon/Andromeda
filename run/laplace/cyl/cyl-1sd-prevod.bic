@@ -1,0 +1,48 @@
+#
+#  Andromeda BiC file
+#
+
+#
+# first enter number of equations and the name of each
+#
+EQUATIONS 1
+temperatura
+
+#
+# Define subdomains (sdName, diff,  followed by list of walls)
+#
+SUBDOMAINS 1
+sdEna 1.0 spredaj zadaj stena
+
+#
+# boundary conditions
+#
+# BOUNDARY eq.name function/flux const/lin/qud
+
+BOUNDARY temperatura spredaj function const
+1.0
+BOUNDARY temperatura zadaj function const
+0.0
+BOUNDARY temperatura stena flux const
+0.0
+
+#
+# initial conditions
+#
+# INITIAL eq.name wallName function/flux const/lin/qud
+
+#INITIAL temperatura stena function lin
+#1.0 0.0 0.0 -1.0
+
+INITIAL temperatura stena function const 
+-3.3
+#
+# CORNER and EDGE nodes
+#
+# EDGE eq.name wall1 wall2 TargetWall
+EDGE sdEna spredaj stena spredaj
+EDGE sdEna zadaj stena zadaj
+#
+# SOLVER definition
+#
+SOLVER temperatura 0 2 2 500 5 1.0E-15

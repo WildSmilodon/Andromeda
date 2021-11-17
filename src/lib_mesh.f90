@@ -92,11 +92,16 @@
       WRITE (itp,'(A)') '</PointData>'
 !
 !     PODATKI NA ELEMENTE
-!
       WRITE (tmp,'("(",I1,"A)")') neq+2
-      WRITE (itp,tmp) '<CellData Vectors="normale" Scalars="pressure,elemBCid',(',q'//TRIM(eqn(i)%name),i=1,neq),'">'
 
-
+      IF (parPrType .EQ. parStokes) THEN
+        WRITE (itp,tmp) '<CellData Vectors="normale" Scalars="pressure,elemBCid',(',q'//TRIM(eqn(i)%name),i=1,neq),'">'
+      END IF
+      IF (parPrType .EQ. parLaplace) THEN
+        WRITE (itp,tmp) '<CellData Vectors="normale" Scalars="elemBCid',(',q'//TRIM(eqn(i)%name),i=1,neq),'">'
+      END IF
+!
+            
 !      NORMALE
       WRITE (itp,'(A)') '<DataArray type="Float32" Name="normale" NumberOfComponents="3" format="ascii">'
       DO  i=1,nelem
@@ -108,13 +113,15 @@
       WRITE (itp,'(A)') '</DataArray>'
 
 !     pressure
-      WRITE (itp,'(A)') '<DataArray type="Float32" Name="pressure" format="ascii">'
-      DO  i=1,nelem
-        IF (element(i)%bcid.EQ.iWall)  THEN
-          WRITE (itp,*) eqn(1)%p(i)
-        END IF
-      END DO
-      WRITE (itp,'(A)') '</DataArray>'
+      IF (parPrType .EQ. parStokes) THEN
+        WRITE (itp,'(A)') '<DataArray type="Float32" Name="pressure" format="ascii">'
+        DO  i=1,nelem
+          IF (element(i)%bcid.EQ.iWall)  THEN
+            WRITE (itp,*) eqn(1)%p(i)
+          END IF
+        END DO
+        WRITE (itp,'(A)') '</DataArray>'
+      END IF
 
 !     element BCid
       WRITE (itp,'(A)') '<DataArray type="Float32" Name="elemBCid" format="ascii">'
@@ -226,9 +233,6 @@
 
       itp=96
 
-!      CALL AddLeadingZeros(cnt%tstep,cifra)
-!      WRITE (vrstica,'(A,A6,A)') "tri_",trim(cifra),".vtu"
-!      OPEN (itp,FILE=trim(vrstica),STATUS='UNKNOWN')
       OPEN (itp,FILE=TRIM(parResultsFileName),STATUS='UNKNOWN')
 
 
@@ -238,27 +242,8 @@
       WRITE (itp,'(A)') '<UnstructuredGrid>'
       WRITE (itp,'(A,I10,A,I10,A)') '<Piece NumberOfPoints="',nnodes,'" NumberOfCells="',nelem,'">'
 
-!      WRITE (itp,'(A)') '<PointData Vectors="velocity,vorticity" Scalars="temperature,dc">'
-
       WRITE (tmp,'("(",I1,"A)")') neq+2
       WRITE (itp,tmp) '<PointData Scalars="node',(",u" // TRIM(eqn(i)%name),i=1,neq),'">'
-
-!      HITROST
-!      WRITE (itp,'(A)') '<DataArray type="Float32" Name="velocity" NumberOfComponents="3" format="ascii">'
-!      DO  i=1,mesh%nnodes
-!        WRITE (vrstica,'(3G18.9)') v(i,1),v(i,2),v(i,3)
-!        CALL sqblnk(itp,vrstica)
-!      END DO
-!      WRITE (itp,'(A)') '</DataArray>'
-
-!      VRTINCNOST
-!      WRITE (itp,'(A)') '<DataArray type="Float32" Name="vorticity" NumberOfComponents="3" format="ascii">'
-!      DO  i=1,mesh%nnodes
-!        WRITE (vrstica,'(3G18.9)') w(i,1),w(i,2),w(i,3)
-!        CALL sqblnk(itp,vrstica)
-!      END DO
-!      WRITE (itp,'(A)') '</DataArray>'
-
 !
 !     PODATKI V VOZLISCIH
 !
@@ -281,7 +266,14 @@
 !     PODATKI NA ELEMENTE
 !
       WRITE (tmp,'("(",I1,"A)")') neq+2
-      WRITE (itp,tmp) '<CellData Vectors="normale" Scalars="pressure,elemBCid',(',q'//TRIM(eqn(i)%name),i=1,neq),'">'
+
+
+      IF (parPrType .EQ. parStokes) THEN
+        WRITE (itp,tmp) '<CellData Vectors="normale" Scalars="pressure,elemBCid',(',q'//TRIM(eqn(i)%name),i=1,neq),'">'
+      END IF
+      IF (parPrType .EQ. parLaplace) THEN
+        WRITE (itp,tmp) '<CellData Vectors="normale" Scalars="elemBCid',(',q'//TRIM(eqn(i)%name),i=1,neq),'">'
+      END IF
 
 !      NORMALE
       WRITE (itp,'(A)') '<DataArray type="Float32" Name="normale" NumberOfComponents="3" format="ascii">'
@@ -292,11 +284,13 @@
       WRITE (itp,'(A)') '</DataArray>'
 
 !     pressure
-      WRITE (itp,'(A)') '<DataArray type="Float32" Name="pressure" format="ascii">'
-      DO  i=1,nelem
-        WRITE (itp,*) eqn(1)%p(i)
-      END DO
-      WRITE (itp,'(A)') '</DataArray>'
+      IF (parPrType .EQ. parStokes) THEN
+        WRITE (itp,'(A)') '<DataArray type="Float32" Name="pressure" format="ascii">'
+        DO  i=1,nelem
+          WRITE (itp,*) eqn(1)%p(i)
+        END DO
+        WRITE (itp,'(A)') '</DataArray>'
+      END IF
 
 !     element BCid
       WRITE (itp,'(A)') '<DataArray type="Float32" Name="elemBCid" format="ascii">'
