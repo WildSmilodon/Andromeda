@@ -209,6 +209,88 @@
 !
 ! ----------------------------------------------------------------------
 !
+  subroutine centerOfWall(isd,iWall,r)
+    integer i,j,isd,iWall
+    real(rk) r(3)
+
+    r = 0.0_rk
+    do i=1,subdomain(isd)%nnodes
+      if (subdomain(isd)%bcidList(i).eq.iWall) then
+        do j=1,3
+          r(j)=r(j)+node(subdomain(isd)%nodeList(i))%x(j)
+        end do        
+      end if
+    end do
+
+    do j=1,3
+      r(j)=r(j)/nnodes
+    end do
+
+  end subroutine
+
+!
+! ----------------------------------------------------------------------
+!
+  subroutine SignedVolumeOfTriangle(p1,p2,p3,V)
+    real(rk) p1(3),p2(3),p3(3),V
+    real(rk) v321,v231,v312,v132,v213,v123
+
+    v321 = p3(1)*p2(2)*p1(3);
+    v231 = p2(1)*p3(2)*p1(3);
+    v312 = p3(1)*p1(2)*p2(3);
+    v132 = p1(1)*p3(2)*p2(3);
+    v213 = p2(1)*p1(2)*p3(3);
+    v123 = p1(1)*p2(2)*p3(3);
+    V = (1.0_rk/6.0_rk)*(-v321 + v231 + v312 - v132 - v213 + v123);
+  end subroutine
+
+!
+! ----------------------------------------------------------------------
+!
+  subroutine calculateVolumeInsideWall(isd,iWall,V)
+
+    integer i,iWall,isd,n1,n2,n3,n4
+    type(ElementType) e
+    real(rk) r(3),Velement,V
+
+    call centerOfWall(isd,iWall,r)
+    
+    V = 0.0_rk
+    do i=1,subdomain(isd)%nelem
+      e = element(subdomain(isd)%elementList(i))
+      if (e%bcid.eq.iWall) then
+        
+        if (e%type.EQ.2) then ! 3 node trangle
+          ! list of nodes in triangle
+          n1 = e%con(1)
+          n2 = e%con(2)
+          n3 = e%con(3)
+          call SignedVolumeOfTriangle(node(n1)%x-r,node(n2)%x-r,node(n3)%x-r,Velement)
+          V = V + abs(Velement)
+
+        else if (e%type.EQ.3) then ! 4 node quad
+          ! list of nodes in quad
+          n1 = e%con(1)
+          n2 = e%con(2)
+          n3 = e%con(3)
+          n4 = e%con(4)
+          call SignedVolumeOfTriangle(node(n1)%x-r,node(n2)%x-r,node(n3)%x-r,Velement)
+          V = V + abs(Velement)
+          call SignedVolumeOfTriangle(node(n1)%x-r,node(n3)%x-r,node(n4)%x-r,Velement)
+          V = V + abs(Velement)
+
+          
+        end if
+
+      end if
+    end do
+
+  end subroutine
+
+
+!
+! ----------------------------------------------------------------------
+!
 
       END MODULE
 

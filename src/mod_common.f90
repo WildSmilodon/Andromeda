@@ -5,5 +5,6 @@ module mCommon
 !    
     integer,  parameter :: rk = selected_REAL_kind(8)
     REAL(rk), parameter :: pi = 3.141592653589793238462643383_rk
+    logical, parameter :: debugOutput = .true.
 
 end module  

@@ -32,6 +32,14 @@
               ]
           },  
           {
+            "label": "run S-flow-all-sides",
+            "type": "shell",
+            "command": "cd run/stokes/flow-over-sphere-from-all-sides && ../../../bin/Andromeda",
+            "problemMatcher": [
+                "$gcc"
+            ]
+          },
+          {
             "label": "run S-Couette",
             "type": "shell",
             "command": "cd run/stokes/Couette && ../../../bin/Andromeda",

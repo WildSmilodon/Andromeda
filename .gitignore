@@ -41,3 +41,16 @@
 *.txt
 *.bin
 navodila-git
+run/mesh/ellipsoid.geo
+run/mesh/ellipsoid211-in-sphere-1024-1969-3930.msh
+run/mesh/ellipsoid211-in-sphere-1024-3630-7324.msh
+run/mesh/ellipsoid211-in-sphere-1024-6776-13638.msh
+run/mesh/ellipsoid211-in-sphere-1024-728-1485.msh
+run/mesh/ellipsoid211-in-sphere-1024-736-1464.msh
+run/mesh/ellipsoid211-in-sphere-2048-3625-7314.msh
+run/mesh/ellipsoid211-in-sphere-4096-3623-7310.msh
+run/mesh/ellipsoid211-in-sphere-512-3624-7312.msh
+run/mesh/sphere-in-sphere-1024-1147-2512-tri.msh
+run/mesh/sphere-in-sphere-1024-3497-7344-tri.msh
+run/mesh/sphere-in-sphere-1024-667-1504-tri.msh
+run/stokes/flow-over-sphere-from-all-sides/

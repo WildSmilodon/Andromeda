@@ -248,7 +248,7 @@ SUBROUTINE StokesInlet3sidesTorqueOmegaCRS()
               flowVelocity(3) = - node(nid)%x(1)
             end if
 
-            if (i.eq.3) then ! rotation around z axis
+            if (i.eq.3) then ! rotation around z axis ! PAZI NAROBE PREDZNAK !!! (-y,x,0) bi moralo biti
               flowVelocity(1) =   node(nid)%x(2)
               flowVelocity(2) = - node(nid)%x(1)              
             end if
@@ -353,7 +353,7 @@ SUBROUTINE StokesInlet3sidesForceCRS()
   integer i,j,k,nid,outside,particle,lun
   real(rk) flowVelocity(3)
 
-  real(rk) c,rho,nu,resT(3),cdre(3),rotT(3),cmre(3)
+  real(rk) c,rho,nu,resT(3),cdre(3)
   REAL(rk), ALLOCATABLE :: Fnum(:,:),Tnum(:,:),Fdrag(:,:),Flift(:,:)
 
   rho=1.0
@@ -1917,6 +1917,48 @@ subroutine calForceOnParticle(u,F)
 end subroutine
 
 
+subroutine calForceOnSphere(u,F,V)
+  use mPar
+  implicit none
+
+  real(rk) R,u(3),F(3),nu,rho,V
+
+  !V = pi/6.0_rk
+  R = (3.0_rk*V/4.0_rk/pi)**(1.0_rk/3.0_rk)
+  nu = 1.0_rk
+  rho = 1.0_rk
+
+  F(1) = 6.0_rk *u(1)*R*pi*nu*rho
+  F(2) = 6.0_rk *u(2)*R*pi*nu*rho
+  F(3) = 6.0_rk *u(3)*R*pi*nu*rho
+
+end subroutine
+
+
+subroutine calForceOnEllipsoid(u,F,lambda,V)
+
+  use mPar
+  implicit none
+  real(rk) R,ResTprime(3),u(3),F(3),lambda,nu,rho,V
+
+  ! semi-minor axis
+  R = (3.0_rk*V/4.0_rk/pi/lambda)**(1.0_rk/3.0_rk)
+  nu = 1.0_rk
+  rho = 1.0_rk
+
+  call CalResTensorPrime(lambda,ResTprime)
+
+  F(1)=resTprime(1)*u(1)*R*pi*nu*rho
+  F(2)=resTprime(2)*u(2)*R*pi*nu*rho
+  F(3)=resTprime(3)*u(3)*R*pi*nu*rho
+
+  !print *,R
+  !print *,resTprime
+  !print *,F
+
+end subroutine
+
+
 ! -----------------------------------------------------------------------------
 
 SUBROUTINE OutputForceErrorParaview(iWall,Fnum,Fana,err,Fdrag,Flift)
@@ -2140,7 +2182,6 @@ subroutine sphere2superE()
 end subroutine
 
 
-
 ! -----------------------------------------------------------------------------------------
 SUBROUTINE mapSphereToSuperE(a,b,c,e1,e2,t,r)
 !
@@ -2170,33 +2211,29 @@ END SUBROUTINE
 
 ! -----------------------------------------------------------------------------------------
 subroutine projectPoints2superE()
-  !
-  !     Project mesh points to supere surface
-  !
-  ! -----------------------------------------------------------------------------------------  
-    use mPar
-    use mMesh
-    implicit none
-    real(rk) selX(3),r
-    integer i,k,maxk
+!
+!     Project mesh points to supere surface
+!
+! -----------------------------------------------------------------------------------------  
+  use mPar
+  use mMesh
+  implicit none
+  real(rk) r
+  integer i,k,maxk
   
-    real(rk) u0,u,res,p(3),np(3)
-    real(rk) a,b,c,e1,e2
+  real(rk) u0,u,res,np(3)
+  real(rk) a,b,c,e1,e2,f,df
   
-    !PRINT *, "Entering Subroutine :: projectPoints2superE"
+  !PRINT *, "Entering Subroutine :: projectPoints2superE"
   
-    DO i=1,nnodes
-      r = node(i)%x(1)**2 + node(i)%x(2)**2 + node(i)%x(3)**2
-      IF (r.LT.10) THEN
-        !call mapSphereToSuperE(parMTsel(1),parMTsel(2),parMTsel(3),parMTsel(4),parMTsel(5),selX,node(i)%x)
-        !node(i)%x = selX
-        !print *,i,parMTsel(1),parMTsel(2),parMTsel(3),parMTsel(4),parMTsel(5)
+  DO i=1,nnodes
+    r = node(i)%x(1)**2 + node(i)%x(2)**2 + node(i)%x(3)**2
+    IF (r.LT.10.0_rk) THEN
   
         np(1) = node(i)%x(1)
         np(2) = node(i)%x(2)
         np(3) = node(i)%x(3)
   
-        !PRINT *, "np=",np
         CALL NormVector(np)
   
         a = parMTsel(1)
@@ -2210,12 +2247,15 @@ subroutine projectPoints2superE()
       
         k = 0
         maxk = 1000
-        DO, WHILE ( res > 1.0e-3 )
+        DO WHILE ( res > 1.0e-3 )
       
-          u = u0 - f(u0,np) / df(u0,np)
+          call calF(a,b,c,e1,e2,u0,np,f)
+          call calDF(a,b,c,e1,e2,u0,np,df)
+          u = u0 - f / df
           !PRINT *, "u=",u,f(u0,np),df(u0,np)
       
-          res = abs( f(u,np) )
+          call calF(a,b,c,e1,e2,u,np,f)
+          res = abs( f )
           u0 = u
       
           IF (k > maxk) EXIT
@@ -2232,65 +2272,42 @@ subroutine projectPoints2superE()
         !PRINT *, "k=",k
         !PRINT *, "p=",node(i)%x 
   
-      END IF
-    END DO
+    END IF
+  END DO
   
-  !  np(1) = 1.0D0
-  !  np(2) = 0.0D0
-  !  np(3) = 0.0D0
-  !
-  !  a = 5.0D0
-  !  b = 5.0D0
-  !  c = 1.0D0
-  !  e1 = 0.2D0 
-  !  e2 = 0.2D0
-  !
-  !  CALL NormVector(np)
-  
-  !  PRINT *, "Done projectPoints2superE"
-  
-    CONTAINS
-    FUNCTION f(t,p)
-  
-     IMPLICIT NONE
-      
-      real(rk) f,t,p(3)
-      real(rk) x,y,z
-     !real(rk) sign_x, sign_y, sign_z
-  
-     !sign_x = SIGN( real(1,rk), x )
-     !sign_y = SIGN( real(1,rk), y )
-     !sign_z = SIGN( real(1,rk), z )
-  
-      x = abs( p(1) )
-      y = abs( p(2) )
-      z = abs( p(3) )
-  
-      f = ( (t*x/a)**(2/e2) + (t*y/b)**(2/e2) )**(e2/e1) + (t*z/c)**(2/e1) - 1
-      !print *, "f+1=",f+1
-      
-      RETURN
-  
-    END FUNCTION
-  
-    FUNCTION df(t,p)
-  
-      real(rk) df,t,p(3)
-      real(rk) x,y,z
-      
-      x = abs( p(1) )
-      y = abs( p(2) )
-      z = abs( p(3) )
-      
-      df = 2 * ( ((t*x/a)**(2/e2) + (t*y/b)**(2/e2))**(e2/e1) + (t*z/c)**(2/e1) )
-      !print *, "df=",df
-      df = df / (e1*t)
-      !print *, "df=",df
-  
-      RETURN
-  
-    END FUNCTION
-  
-  end subroutine
+end subroutine
         
-      
+subroutine calF(a,b,c,e1,e2,t,p,f)
+  USE mPar
+  IMPLICIT NONE
+   
+   real(rk) t,p(3),f
+   real(rk) x,y,z,a,b,c,e1,e2
+  !real(rk) sign_x, sign_y, sign_z
+  !sign_x = SIGN( real(1,rk), x )
+  !sign_y = SIGN( real(1,rk), y )
+  !sign_z = SIGN( real(1,rk), z )
+   x = abs( p(1) )
+   y = abs( p(2) )
+   z = abs( p(3) )
+   f = ( (t*x/a)**(2/e2) + (t*y/b)**(2/e2) )**(e2/e1) + (t*z/c)**(2/e1) - 1
+   !print *, "f+1=",f+1
+   
+   RETURN
+ end subroutine
+ 
+subroutine  calDF(a,b,c,e1,e2,t,p,df)
+ use mPar
+ implicit none 
+ real(rk) df,t,p(3)
+ real(rk) x,y,z,a,b,c,e1,e2
+
+  x = abs( p(1) )
+  y = abs( p(2) )
+  z = abs( p(3) )
+  
+  df = 2 * ( ((t*x/a)**(2/e2) + (t*y/b)**(2/e2))**(e2/e1) + (t*z/c)**(2/e1) )
+  df = df / (e1*t)
+
+  RETURN
+end subroutine   

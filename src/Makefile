@@ -1,7 +1,7 @@
 PROGRAM = Andromeda
-VERSION = 1.4
+VERSION = 1.5
 
-MODOBJECTS = mod_common.o mod_mesh.o mod_trikotnik.o mod_gauss.o mod_par.o mod_eqns.o mod_profile.o
+MODOBJECTS = mod_common.o mod_mesh.o mod_trikotnik.o mod_gauss.o mod_par.o mod_eqns.o mod_profile.o mod_linFlowFields.o
 OBJECTSFIX = lib_lsqr.o lib_solveFM.o 
 OBJECTSF90 = Andromeda.o lib_ppLine.o lib_mesh.o lib_int.o lib_domain.o lib_sdBem.o lib_util.o  lib_CRS.o lib_Stokes.o lib_StokesFull.o lib_particle.o
 

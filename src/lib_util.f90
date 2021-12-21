@@ -60,8 +60,8 @@
 !     vector n1 is rotated into e1=(1,0,0)
 !     e1=R*n1
 !     n1=RT*e1
-            USE mCommon
-            implicit none
+      USE mCommon
+      implicit none
       REAL(rk) e1(3),e2(3),n1(3),n2(3),tmp(3),dp
       REAL(rk) e3(3),e4(3),n3(3),n4(3)
       REAL(rk) Re(3,3),RnT(3,3),R(3,3),RT(3,3)

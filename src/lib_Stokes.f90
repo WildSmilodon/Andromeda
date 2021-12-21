@@ -1,6 +1,3 @@
-
-
-
 !
 !     ------------------------------------------------------------------
 !
@@ -97,6 +94,285 @@ SUBROUTINE pressureStokes()
 end subroutine
 
 
+!
+!  get force on particle from all sides
+!
+subroutine StokesDragFromAllSidesCRS()
+
+  USE mMesh
+  USE mEqns
+  USE mPar
+  USE mCommon
+  implicit none
+
+
+  integer i,j,k,nid,outside,particle,noid,isd,itp
+  real(rk) flowVelocity(3)
+  real(rk) lambda,V,Fsphere
+  !REAL(rk)    R(3,3),RT(3,3),vr(3),sukanje(3),zasukano(3)
+
+  REAL(rk), ALLOCATABLE :: Fnum(:,:),Fana(:,:),err(:),Fdrag(:,:),Flift(:,:)
+  REAL(rk), ALLOCATABLE :: Fs(:), Fbd(:,:),Tnum(:,:)
+
+  ALLOCATE (Fnum(nnodes,3),Fana(nnodes,3),err(nnodes))
+  ALLOCATE (Fdrag(nnodes,3),Flift(nnodes,3))
+  ALLOCATE (Fs(3),Fbd(nnodes,3),Tnum(nnodes,3))
+
+  Fnum=0.0_rk
+  Fdrag=0.0_rk
+  Flift=0.0_rk
+  Fana=0.0_rk
+  err=0.0_rk
+  Tnum = 0.0_rk
+  !
+  !    Loop over outside nodes
+  !
+  outside = 2
+  particle = 1
+  isd=1
+  lambda = 1.0_rk
+  V = pi/6.0_rk
+  !
+  ! Volume of particle
+  !
+  call calculateVolumeInsideWall(1,particle,V)
+  WRITE (parLogTekst,'(A,G20.10)') "Particle volume = ",V
+  CALL WriteToLog(parLogTekst)
+  !
+  ! Force on a sphere of the same volume
+  !
+  flowVelocity(1) = 1.0_rk
+  flowVelocity(2) = 0.0_rk
+  flowVelocity(3) = 0.0_rk
+  call calForceOnSphere(flowVelocity,Fs,V)
+  Fsphere = Fs(1)
+  WRITE (parLogTekst,'(A,G20.10)') "Force on vol. eq. sphere = ",Fsphere
+  CALL WriteToLog(parLogTekst)
+
+  itp=96
+  OPEN (itp,FILE=TRIM(parFromAllSidesFileName),STATUS='UNKNOWN')
+
+  write(itp,'(A)') "#"
+  write(itp,'(A)') "# Andromeda results file, drag force from all sides"
+  write(itp,'(A)') "#"
+  write(itp,'(A)') "#noid flowVelocity drag drag/dragOnSphere torque"
+
+
+  !
+  ! Loop over outside nodes
+  !
+  do i=1,subdomain(isd)%nnodes
+    if (subdomain(isd)%BCidList(i).eq.outside) then
+      !
+      ! Get flow velocity
+      !
+      noid = subdomain(isd)%nodeList(i)            
+      flowVelocity = node(noid)%x
+      call normalize(flowVelocity)
+      !
+      ! Apply flow velocity as boundary condition
+      !
+      do k=1,subdomain(isd)%nnodes
+          if (subdomain(isd)%BCidList(k).eq.outside) then
+              nid = subdomain(isd)%nodeList(k)   
+              DO j=1,3
+                  eqn(j)%u(nid) = flowVelocity(j)
+              END DO
+          end if
+      end do
+
+      ! TEST - vse možne smeri sukanje krogle
+      ! v flow velocity je smer okoli katere želim, da se tekočina suče
+!      print *,"jure"
+!      CALL GetRotationMatrix(R,RT,flowVelocity)
+!      do k=1,subdomain(isd)%nnodes
+!        if (subdomain(isd)%BCidList(k).eq.outside) then
+!            nid = subdomain(isd)%nodeList(k)   
+!            sukanje(1) =   0.0_rk ! v x,y,z sukam okoli osi x
+!            sukanje(2) = - node(nid)%x(3)
+!            sukanje(3) =   node(nid)%x(2)
+!            ! zasukam
+!            zasukano = MATMUL(RT,sukanje)
+!            call normalize(zasukano)
+!            print *,zasukano
+!            DO j=1,3
+!                eqn(j)%u(nid) = zasukano(j)
+!            END DO
+!        end if
+!      end do
+!      call OutputInitialParaview()
+!      stop
+
+
+      ! 
+      ! Solve
+      !
+      CALL StokesBigSystemSOLVEcrs()
+      !
+      ! Postprocess
+      !
+      !
+      !  Calculate force numerically
+      !
+      call getForceIntegrateFluxes(particle,Fnum(noid,:))
+      !
+      !  Nondimensional force
+      !      
+      do j=1,3
+        Fbd(noid,j) = Fnum(noid,j) / Fsphere
+      end do
+
+      !
+      !  Calculate torque numerically
+      !
+      call getTorqueIntegrateFluxes(particle,Tnum(noid,:))
+
+      !
+      ! Calculate drag and lift from total force
+      !
+      !call getDragLift(flowVelocity,Fnum(noid,:),Fdrag(noid,:),Flift(noid,:))
+      !
+      !  Calculate force analytically for spheres or ellipsoids
+      !
+      !call calForceOnEllipsoid(flowVelocity,Fana(noid,:),lambda,V)
+      !
+      !  Estimate error
+      !
+      !st = 0.0_rk
+      !im = 0.0_rk
+      !do j=1,3
+      !    st = st + (Fana(noid,j)-Fnum(noid,j))**2
+      !    im = im + (Fana(noid,j))**2
+      !end do
+      !err(noid) = sqrt(st/im)
+
+      write (itp,'(I0,1X,12G18.10)') noid,flowVelocity,Fnum(noid,:),Fbd(noid,:),Tnum(noid,:)
+      call flush(itp)
+      !WRITE (parLogTekst,'(I0,1X,4G20.10)') noid,flowVelocity,err(noid)
+      !WRITE (parLogTekst,'(I0,1X,13G18.10)') noid,err(noid),flowVelocity,Fnum(noid,:),Fdrag(noid,:),Flift(noid,:)
+      !CALL WriteToLog(parLogTekst)
+
+    end if
+  end do
+
+  close(itp)
+
+  deallocate(Fnum,Fana,err,Fdrag,Flift,Fs,Fbd,Tnum)
+
+end subroutine
+
+
+
+
+!     ------------------------------------------------------------------
+!
+SUBROUTINE StokesFLOPcrs()
+
+  USE mMesh
+  USE mEqns
+  USE mPar
+  USE mCommon
+  use linFlowFields
+  implicit none
+
+
+  integer j,k,nid,isd,particle,outside
+  real(rk) flowVelocity(3)
+  real(rk) V,R,mu,v0,L
+
+  REAL(rk), ALLOCATABLE :: Fnum(:),Tbd(:)
+  REAL(rk), ALLOCATABLE :: Fbd(:),Tnum(:)
+
+  ALLOCATE (Fnum(3),Tnum(3))
+  ALLOCATE (Fbd(3),Tbd(3))
+
+  Fnum=0.0_rk
+  Tnum = 0.0_rk
+  Fbd=0.0_rk
+  Tbd = 0.0_rk
+  mu = 1.0_rk
+  v0 = 1.0_rk
+  L = 1.0_rk
+
+  !
+  ! Volume of particle
+  !
+  particle = 1
+  outside = 2
+  isd = 1
+  call calculateVolumeInsideWall(1,particle,V)
+  R=(3.0_rk*V/(4*pi))**(1.0_rk/3.0_rk)
+  WRITE (parLogTekst,'(2(A,G20.10))') "Particle volume = ",V, " Raduis vol. eq. sphere = ",R
+  CALL WriteToLog(parLogTekst)
+  !
+  ! Init particle and its rotation
+  !
+  call lff_init()
+  !
+  ! Apply flow velocity as boundary condition
+  !
+  do k=1,subdomain(isd)%nnodes
+      if (subdomain(isd)%BCidList(k).eq.outside) then
+          nid = subdomain(isd)%nodeList(k)   
+          call lff_getFlowVelocityPFR( node(nid)%x(1),node(nid)%x(2),node(nid)%x(3),flowVelocity)
+          DO j=1,3
+              eqn(j)%u(nid) = flowVelocity(j)
+          END DO
+      end if
+  end do
+  ! 
+  ! Solve
+  !
+  CALL StokesBigSystemSOLVEcrs()
+  !
+  ! Postprocess
+  !
+  !
+  !  Calculate force numerically
+  !
+  call getForceIntegrateFluxes(particle,Fnum)
+  !
+  !  Nondimensional force
+  !      
+  do j=1,3
+    Fbd(j) = Fnum(j) / (pi*R*mu*v0)
+  end do
+  !
+  !  Calculate torque numerically
+  !
+  call getTorqueIntegrateFluxes(particle,Tnum)
+  !
+  !  Nondimensional force
+  !      
+  do j=1,3
+    Tbd(j) = Tnum(j) / (pi*R*R*R*mu*v0/L)
+  end do  
+  !
+  !  Write force and torque results to log file
+  !
+  WRITE (parLogTekst,'(A)') "Force / (pi*R*mu*v0)"
+  CALL WriteToLog(parLogTekst)  
+  WRITE (parLogTekst,'(3G18.10)') Fbd
+  CALL WriteToLog(parLogTekst)
+  WRITE (parLogTekst,'(A)') "Torque / (pi*R^3*mu*v0/L)"
+  CALL WriteToLog(parLogTekst)    
+  WRITE (parLogTekst,'(3G18.10)') Tbd
+  CALL WriteToLog(parLogTekst)
+  WRITE (parLogTekst,'(A)') "Force"
+  CALL WriteToLog(parLogTekst)  
+  WRITE (parLogTekst,'(3G18.10)') Fnum
+  CALL WriteToLog(parLogTekst)
+  WRITE (parLogTekst,'(A)') "Torque"
+  CALL WriteToLog(parLogTekst)    
+  WRITE (parLogTekst,'(3G18.10)') Tnum
+  CALL WriteToLog(parLogTekst)
+
+  deallocate(Fnum,Tbd,Fbd,Tnum)  
+
+end
+
+
+
 !     ------------------------------------------------------------------
 !
 SUBROUTINE StokesBigSystemSOLVEcrs()
@@ -149,7 +425,8 @@ SUBROUTINE StokesBigSystemSOLVEcrs()
   !
   !     Free memory
   !      
-  DEALLOCATE(b,stk%sysMcrs%v,stk%rhsMcrs%v)
+  !DEALLOCATE(b,stk%sysMcrs%v,stk%rhsMcrs%v)
+  DEALLOCATE(b)
 
 end
 
@@ -1159,10 +1436,9 @@ SUBROUTINE sdIntRowQStokes(isd,irow, &
     INTEGER ie,i,j,IntRecDepth,isrc,jj,iWall
     REAL(rk) sx,sy,sz
     REAL(rk) x1,y1,z1,x2,y2,z2,x3,y3,z3,x4,y4,z4
-    REAL(rk) integ,err,shpf
+    REAL(rk) err,shpf
 
-    REAL(rk) multi
-    REAL(rk) cx,cy,cz,osemPi,c
+    REAL(rk) cx,cy,cz,osemPi
 
     REAL(rk) rowTxx(nnodes), rowTxy(nnodes), rowTxz(nnodes), rowTyy(nnodes), rowTyz(nnodes), rowTzz(nnodes)
     REAL(rk) rowGxx(nqnodes),rowGxy(nqnodes),rowGxz(nqnodes),rowGyy(nqnodes),rowGyz(nqnodes),rowGzz(nqnodes)
@@ -2196,7 +2472,7 @@ SUBROUTINE CoR_Integrals_Stokes()
 
       IMPLICIT NONE
 
-      INTEGER ierr,isd,i
+      INTEGER ierr,isd
       REAL(rk) uSize,qSize,tSize
 
 !
@@ -2580,8 +2856,6 @@ SUBROUTINE GetStokesDomainValue(SourcePoint,ux,uy,uz,qx,qy,qz,rx,ry,rz,p,diff,er
   REAL(rk) uz(nnodes),qz(nqnodes)
   REAL(rk) rx,ry,rz,p,diff
   REAL(rk) SourcePoint(3)
-  REAL(rk) s1,s2,s3
-
 
   INTEGER isd ! subdomain number
   INTEGER ie,i,j,IntRecDepth,isrc,jj,iWall

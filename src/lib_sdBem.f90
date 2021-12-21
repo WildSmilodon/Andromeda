@@ -316,7 +316,7 @@
 !
 !     ------------------------------------------------------------------
 !
-      SUBROUTINE SetUpSubdomains()
+SUBROUTINE SetUpSubdomains()
 
       USE mMesh
       USE mEqns
@@ -324,7 +324,7 @@
 
       IMPLICIT NONE
 
-      INTEGER isd,iWall,jj,ie,i,j
+      INTEGER isd,iWall,jj,ie,i,j,ww,st,iW
       INTEGER, ALLOCATABLE :: tmp(:)
 
 
@@ -413,9 +413,21 @@
         WRITE (parLogTekst,'(A15,4(1X,I0))') TRIM(subdomain(isd)%name),subdomain(isd)%nofw,subdomain(isd)%nelem, &
                                        subdomain(isd)%nnodes,subdomain(isd)%nqnodes
         CALL WriteToLog(parLogTekst)
+        DO iW = 1,subdomain(isd)%nofw
+          ww = subdomain(isd)%loWalls(iW)
+          st = 0
+          DO j=1,subdomain(isd)%nnodes
+            if (subdomain(isd)%BCidList(j).eq.ww) then
+              st = st + 1
+            end if
+          END DO
+          WRITE (parLogTekst,'(A,1x,A,1x,I0)') "wall nn:",TRIM(wall(ww)%name),st
+          CALL WriteToLog(parLogTekst)
+        END DO                                      
+
       END DO
 
-      END
+  END
 
 
 

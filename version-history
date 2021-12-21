@@ -38,4 +38,7 @@
   - 1.3   :  odpravil bug pri CRS, Stokes pressure solver, 
              dodal tlak v zapis integralov, izpis v Paraview
 
-  - 1.4   :  first git commit, refactoring
+  - 1.4   :  first git commit, refactoring, small bugs, updated examples, 
+             laplace output without pressure
+
+  - 1.5   :  flow-over-rotated-particle FLOP keyword             

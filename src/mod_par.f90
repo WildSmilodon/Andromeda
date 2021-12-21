@@ -54,6 +54,8 @@
 
       INTEGER parWriteIntegrals,parOutRest,parPostOnly,parConserveMemory
       INTEGER parfromDisk,parSval,parTrii
+      INTEGER parFlop,parFlopFlowType
+      REAL(rk) parFlopUgU(16)
 
       INTEGER parPrType,parStokes,parLaplace
 
@@ -64,7 +66,7 @@
       CHARACTER(255) parInitialFileName,parResultsWallName,parResultsForceErr
       CHARACTER(255) parLogFileName,parIntegralsFileName
       INTEGER parYes,parNo
-      CHARACTER(255) parLogTekst
+      CHARACTER(255) parLogTekst,parFromAllSidesFileName
       CHARACTER(255) parPPFileName,parRstFileName
 
       INTEGER parOutInit
@@ -86,6 +88,7 @@
       PARAMETER (parResultsForceErr="and.forceErr.")
       PARAMETER (parIntegralsFileName="and.integrals.bin")
       PARAMETER (parStochasticFileName="and.stochastic.txt")
+      PARAMETER (parFromAllSidesFileName="and.fromAllSides.txt")
       PARAMETER (parInitialFileName="and.initial.vtu")
       PARAMETER (parLogFileName="and.log")
       PARAMETER (parRstFileName="and.rst")
@@ -121,7 +124,7 @@ subroutine defineKeys()
 !
 !     Keywords
 !
-  parNOkeys=27
+  parNOkeys=28
   allocate (parKey(parNOkeys))
   allocate (parKeyDesc(parNOkeys))
   parKey(1)="MDIR"
@@ -178,6 +181,8 @@ subroutine defineKeys()
   parKeyDesc(26)="lambda1 lambda2 e1 e2 - superellipsoid parameters"      
   parKey(27)="TINW"
   parKeyDesc(27)="Yes/No - integral of torque at the walls."      
+  parKey(28)="FLOP"
+  parKeyDesc(28)="flowType x y z e0 e1 e2 e3 - flow over rotated particle"   
 
 end subroutine
 
@@ -203,6 +208,7 @@ end subroutine
       parQuadIntegRegu=4
       parScreenOutput=parYes
       parSval = parNo
+      parFlop = parNo
       parTrii = parNo
 
 !     Mesh transromation
@@ -359,10 +365,25 @@ end subroutine
           parSval=Cstring(dummy,"YES")          
         ELSE IF (KeyWord.EQ.parKey(26)) THEN ! TRII
           READ(OneLine,*) dummy,parSuelLam1,parSuelLam2,parSuelE1,parSuelE2
-          parTrii = parYes
+          parTrii = parYes         
         ELSE IF (KeyWord.EQ.parKey(27)) THEN ! TINW
           READ(OneLine,*) dummy,dummy
           parTinw=Cstring(dummy,"YES")          
+        ELSE IF (KeyWord.EQ.parKey(28)) THEN ! TRII
+          READ(OneLine,*) dummy,parFlopFlowType
+          if (parFlopFlowType.gt.0) then
+            READ(OneLine,*) dummy,parFlopFlowType,&
+            parFlopUgU( 1),parFlopUgU( 2),parFlopUgU( 3), parFlopUgU( 4), &  ! e0,e1,e2,e3
+            parFlopUgU( 5),parFlopUgU( 6),parFlopUgU( 7)                     ! particle position in IFR
+          else
+            READ(OneLine,*) dummy,parFlopFlowType, &
+              parFlopUgU( 1),parFlopUgU( 2),parFlopUgU( 3), parFlopUgU( 4), &  ! e0,e1,e2,e3
+              parFlopUgU( 5),parFlopUgU( 6),parFlopUgU( 7), &  ! U(1),U(2),U(3)
+              parFlopUgU( 8),parFlopUgU( 9),parFlopUgU(10), &  ! graU(1,1), graU(1,2), graU(1,3)
+              parFlopUgU(11),parFlopUgU(12),parFlopUgU(13), &  ! graU(2,1), graU(2,2), graU(2,3)
+              parFlopUgU(14),parFlopUgU(15),parFlopUgU(16)     ! graU(3,1), graU(3,2), graU(3,3)
+          end if
+          parFlop = parYes  
         END IF
 
         CALL rOneTL(lun,OneLine)

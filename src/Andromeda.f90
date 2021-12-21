@@ -1,3 +1,4 @@
+program Andromeda
 !
 !     Andromeda, a BEM code
 !
@@ -11,6 +12,8 @@
       USE Triangle
       USE mPar
       USE mEqns
+      use linFlowFields
+      use mCommon
 !
 !     Local vars
 !
@@ -20,8 +23,8 @@
 !     Name and version of the code
 !
       parIDname='Andromeda'
-      parIDversion='1.4'
-      parIDdate='October 2021'
+      parIDversion='1.5'
+      parIDdate='December 2021'
 !
 !     Get start time and computer name
 !
@@ -119,7 +122,17 @@
                         CALL StokesInlet3sidesTorquePiCRS()
                   END IF
 
-                  IF (parSval.EQ.parNo.AND.parTrii.EQ.parNo) THEN
+                  IF (parSval.EQ.parYes) THEN
+                        CALL WriteToLog("Solving ... Stokes from all sides run!") 
+                        CALL StokesDragFromAllSidesCRS() 
+                  END IF
+
+                  IF (parFlop.EQ.parYes) THEN
+                        CALL WriteToLog("Solving ... Stokes flow over rotated particle!") 
+                        CALL StokesFLOPcrs()
+                  END IF
+
+                  IF (parSval.EQ.parNo.AND.parTrii.EQ.parNo.AND.parFlop.EQ.parNo) THEN
                         CALL WriteToLog("Solving ...") 
                         CALL StokesBigSystemSOLVEcrs() ! CRS VERSION
                   END IF                  
@@ -221,4 +234,5 @@
 !     Close log file
 !
       CALL StopProgram
-END
+
+end program Andromeda

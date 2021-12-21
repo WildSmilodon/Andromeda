@@ -242,11 +242,27 @@
       WRITE (itp,'(A)') '<UnstructuredGrid>'
       WRITE (itp,'(A,I10,A,I10,A)') '<Piece NumberOfPoints="',nnodes,'" NumberOfCells="',nelem,'">'
 
-      WRITE (tmp,'("(",I1,"A)")') neq+2
-      WRITE (itp,tmp) '<PointData Scalars="node',(",u" // TRIM(eqn(i)%name),i=1,neq),'">'
+
+      IF (parPrType .EQ. parStokes) THEN
+        WRITE (tmp,'("(",I1,"A)")') neq+2
+        WRITE (itp,tmp) '<PointData Vectors="u" Scalars="node',(",u" // TRIM(eqn(i)%name),i=1,neq),'">'
+      END IF
+      IF (parPrType .EQ. parLaplace) THEN
+        WRITE (tmp,'("(",I1,"A)")') neq+2
+        WRITE (itp,tmp) '<PointData Scalars="node',(",u" // TRIM(eqn(i)%name),i=1,neq),'">'
+      END IF
 !
 !     PODATKI V VOZLISCIH
 !
+      IF (parPrType .EQ. parStokes) THEN
+        WRITE (itp,'(A)') '<DataArray type="Float32" Name="u" NumberOfComponents="3" format="ascii">'
+        DO  i=1,nnodes
+          WRITE (vrstica,'(3G18.9)') eqn(1)%u(i),eqn(2)%u(i),eqn(3)%u(i)
+          CALL sqblnk(itp,vrstica)
+        END DO
+        WRITE (itp,'(A)') '</DataArray>'
+      END IF
+
       WRITE (itp,'(A)') '<DataArray type="Float32" Name="node" format="ascii">'
       DO  i=1,nnodes
         WRITE (itp,*) i
