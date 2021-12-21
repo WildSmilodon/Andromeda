@@ -160,9 +160,6 @@ program Andromeda
 
            call pressureStokes() 
 
-
-
-
       END IF
 
       IF (parPrType .EQ. parLaplace) THEN

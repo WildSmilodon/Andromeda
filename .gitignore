@@ -54,3 +54,7 @@ run/mesh/sphere-in-sphere-1024-1147-2512-tri.msh
 run/mesh/sphere-in-sphere-1024-3497-7344-tri.msh
 run/mesh/sphere-in-sphere-1024-667-1504-tri.msh
 run/stokes/flow-over-sphere-from-all-sides/
+run/mesh/oval.msh
+run/mesh/oval.vtk
+run/mesh/sphere-in-sphere-1024-2140-4272-tri.msh
+run/mesh/sphere-in-sphere-1024-2972-5936-tri.msh
