@@ -302,7 +302,7 @@ SUBROUTINE StokesFLOPcrs()
   isd = 1
   call calculateVolumeInsideWall(1,particle,V)
   R=(3.0_rk*V/(4*pi))**(1.0_rk/3.0_rk)
-  WRITE (parLogTekst,'(2(A,G20.10))') "Particle volume = ",V, " Raduis vol. eq. sphere = ",R
+  WRITE (parLogTekst,'(2(A,G20.10))') "Particle volume = ",V, " Radius vol. eq. sphere = ",R
   CALL WriteToLog(parLogTekst)
   !
   ! Init particle and its rotation

@@ -1232,7 +1232,7 @@ END SUBROUTINE
 
 ! ----------------------------------------------------------------------
 !
-      SUBROUTINE ReadGMSHv2(fname)
+      SUBROUTINE ReadGMSHv2(fname)  ! gmsh -2 -format msh2 ime.geo
 !
 ! ----------------------------------------------------------------------
       USE mMesh

@@ -117,14 +117,14 @@ module linFlowFields
       velocityIFR(3) = 0.0_rk
 
       velGradTenIFR(1,1) = 0.0_rk
-      velGradTenIFR(1,2) = 0.0_rk
-      velGradTenIFR(1,3) = 0.0_rk
+      velGradTenIFR(1,2) = - 16.0_rk * v0 / (D*D) * y 
+      velGradTenIFR(1,3) = - 16.0_rk * v0 / (D*D) * z
 
-      velGradTenIFR(2,1) = - 16.0_rk * v0 / (D*D) * y 
+      velGradTenIFR(2,1) = 0.0_rk
       velGradTenIFR(2,2) = 0.0_rk
       velGradTenIFR(2,3) = 0.0_rk
 
-      velGradTenIFR(3,1) = - 16.0_rk * v0 / (D*D) * z
+      velGradTenIFR(3,1) = 0.0_rk
       velGradTenIFR(3,2) = 0.0_rk
       velGradTenIFR(3,3) = 0.0_rk     
 
@@ -143,13 +143,13 @@ module linFlowFields
 
       velGradTenIFR(1,1) = 0.0_rk
       velGradTenIFR(1,2) = 0.0_rk
-      velGradTenIFR(1,3) = 0.0_rk
+      velGradTenIFR(1,3) = 6.0_rk * v0 /  H * ( 1.0_rk - 2.0_rk * z /H)
 
       velGradTenIFR(2,1) = 0.0_rk
       velGradTenIFR(2,2) = 0.0_rk
       velGradTenIFR(2,3) = 0.0_rk
 
-      velGradTenIFR(3,1) = 6.0_rk * v0 /  H * ( 1.0_rk - 2.0_rk * z /H)
+      velGradTenIFR(3,1) = 0.0_rk
       velGradTenIFR(3,2) = 0.0_rk
       velGradTenIFR(3,3) = 0.0_rk     
 
@@ -165,15 +165,15 @@ module linFlowFields
       velocityIFR(3) = v0 * ( C * sin(nu*y/L) + B * cos(nu*x/L) )
 
       velGradTenIFR(1,1) =   0.0_rk
-      velGradTenIFR(1,2) =   B*nu/L * cos(nu*x/L)
-      velGradTenIFR(1,3) = - B*nu/L * sin(nu*x/L)
+      velGradTenIFR(1,2) = - C*nu/L * sin(nu*y/L)
+      velGradTenIFR(1,3) =   A*nu/L * cos(nu*z/L)
 
-      velGradTenIFR(2,1) = - C*nu/L * sin(nu*y/L)
+      velGradTenIFR(2,1) =   B*nu/L * cos(nu*x/L)
       velGradTenIFR(2,2) =   0.0_rk
-      velGradTenIFR(2,3) =   C*nu/L * cos(nu*y/L)
+      velGradTenIFR(2,3) = - A*nu/L * sin(nu*z/L)
 
-      velGradTenIFR(3,1) =   A*nu/L * cos(nu*z/L)
-      velGradTenIFR(3,2) = - A*nu/L * sin(nu*z/L)
+      velGradTenIFR(3,1) = - B*nu/L * sin(nu*x/L)
+      velGradTenIFR(3,2) =   C*nu/L * cos(nu*y/L)
       velGradTenIFR(3,3) =   0.0_rk  
 
     end if
