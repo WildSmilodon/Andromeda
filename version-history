@@ -42,3 +42,4 @@
              laplace output without pressure
 
   - 1.5   :  flow-over-rotated-particle FLOP keyword             
+  - 1.5.1 :  changed calculation of linearized velocity for boundary conditions, in lff_getFlowVelocityPFR
