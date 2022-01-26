@@ -23,8 +23,8 @@ program Andromeda
 !     Name and version of the code
 !
       parIDname='Andromeda'
-      parIDversion='1.5'
-      parIDdate='December 2021'
+      parIDversion='1.5.1'
+      parIDdate='Januar 2022'
 !
 !     Get start time and computer name
 !
@@ -111,7 +111,7 @@ program Andromeda
 
            if (crs) then
 !
-!           Form CRS system and rhs matrices
+!                 Form CRS system and rhs matrices
 !                        
                   CALL stokesFormCRSsysMrhsM()  ! CRS VERSION
 
@@ -139,7 +139,9 @@ program Andromeda
 
 
            else
-
+!
+!                 Form FULL system and rhs matrices
+!    
                   IF (parSval.EQ.parYes) THEN
                         CALL WriteToLog("Solving ... Stokes validation run!") 
                         CALL StokesEllipsoidValidationSOLVE() 

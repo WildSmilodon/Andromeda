@@ -2392,9 +2392,9 @@ END SUBROUTINE
         CALL WriteToLog(tekst)
       END DO
 
-      WRITE (tekst,'(A,3F10.4)') "min:", mextMin
+      WRITE (tekst,'(A,3(1X,F10.4))') "min:", mextMin
       CALL WriteToLog(tekst)
-      WRITE (tekst,'(A,3F10.4)') "max:", mextMax
+      WRITE (tekst,'(A,3(1X,F10.4))') "max:", mextMax
       CALL WriteToLog(tekst)
 
       END SUBROUTINE

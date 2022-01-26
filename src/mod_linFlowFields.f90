@@ -78,9 +78,14 @@ module linFlowFields
     rr = MATMUL(RMT,rr)
 
     ! here w is calculated
-    u(1) = u(1) + velGradTenIFR(1,1) * rr(1)  + velGradTenIFR(2,1) * rr(2)  + velGradTenIFR(3,1) * rr(3)
-    u(2) = u(2) + velGradTenIFR(1,2) * rr(1)  + velGradTenIFR(2,2) * rr(2)  + velGradTenIFR(3,2) * rr(3)
-    u(3) = u(3) + velGradTenIFR(1,3) * rr(1)  + velGradTenIFR(2,3) * rr(2)  + velGradTenIFR(3,3) * rr(3)
+!    u(1) = u(1) + velGradTenIFR(1,1) * rr(1)  + velGradTenIFR(2,1) * rr(2)  + velGradTenIFR(3,1) * rr(3)
+!    u(2) = u(2) + velGradTenIFR(1,2) * rr(1)  + velGradTenIFR(2,2) * rr(2)  + velGradTenIFR(3,2) * rr(3)
+!    u(3) = u(3) + velGradTenIFR(1,3) * rr(1)  + velGradTenIFR(2,3) * rr(2)  + velGradTenIFR(3,3) * rr(3)
+
+    u(1) = u(1) + velGradTenIFR(1,1) * rr(1)  + velGradTenIFR(1,2) * rr(2)  + velGradTenIFR(1,3) * rr(3)
+    u(2) = u(2) + velGradTenIFR(2,1) * rr(1)  + velGradTenIFR(2,2) * rr(2)  + velGradTenIFR(2,3) * rr(3)
+    u(3) = u(3) + velGradTenIFR(3,1) * rr(1)  + velGradTenIFR(3,2) * rr(2)  + velGradTenIFR(3,3) * rr(3)
+
 
     if (present(debug)) then
       print *,"w"
@@ -442,10 +447,11 @@ module linFlowFields
     !
     if (flowType.eq.ABCflow) then
       A = 1.0_rk
-      B = 1.0_rk
-      C = 1.0_rk
+      B = 2.0_rk
+      C = 3.0_rk
       L = 1.0_rk
       nu = 2.0_rk * pi
+      v0 = 1.0_rk
     end if
     
     if (flowType.gt.0) then ! use special predefinded flow types
