@@ -65,4 +65,4 @@ sudo apt-get install gmsh
 
 ### Getting help
 
-* running Andromeda with ```h``` command line argument displays help.
+* running Andromeda with ```-h``` command line argument displays help.
