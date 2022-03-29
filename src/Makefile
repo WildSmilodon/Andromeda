@@ -24,11 +24,11 @@ FCOPTS = -ffixed-line-length-132  -fcray-pointer
 
 # Blas library
 
-ifneq (,$(findstring hobbit,$(HOST)))
-  LDOPTO = /usr/lib/libblas.so
-else
+#ifneq (,$(findstring hobbit,$(HOST)))
+#  LDOPTO = /usr/lib/libblas.so
+#else
   LDOPTO = /usr/lib/x86_64-linux-gnu/blas/libblas.so
-endif
+#endif
 
 
 all: mod fixed f90
