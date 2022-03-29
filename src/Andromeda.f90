@@ -23,8 +23,8 @@ program Andromeda
 !     Name and version of the code
 !
       parIDname='Andromeda'
-      parIDversion='1.5.1'
-      parIDdate='Januar 2022'
+      parIDversion='1.6'
+      parIDdate='April 2022'
 !
 !     Get start time and computer name
 !
