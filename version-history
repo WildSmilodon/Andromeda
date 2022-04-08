@@ -45,3 +45,4 @@
   - 1.5.1 :  changed calculation of linearized velocity for boundary conditions, in lff_getFlowVelocityPFR
 
   - 1.6   :  implement parallel solver, lis library
+             resolved bug in pressure solution when using tri meshes

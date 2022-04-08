@@ -6,7 +6,11 @@
 MDIR ./
 
 # Mesh file
-LGEO ../../mesh/kocka-000-111-602-600_hex.msh
+#LGEO ../../mesh/kocka-000-111-602-600_hex.msh
+#LGEO ../../mesh/kocka-000-111-152-150_hex.msh
+LGEO ../../mesh/kocka-000-111-314-624_tri.msh
+#LGEO ../../mesh/kocka-000-111-3080-6156_tri.msh
+
 
 # BiC file
 
@@ -39,10 +43,15 @@ WINT No
 SCRO No
 #SCRO Yes
 
+# LIS solver settings
+LISS -i bicg -p none -tol 1.0e-8 -maxiter 1000
+
 # Domain profile
 DPLE 2
 zProf 0.5 0.5 0.0 0.5 0.5 1.0 101
 xProf 0.0 0.5 0.5 1.0 0.5 0.5 101
+
+
 
 
 #PPLI 1

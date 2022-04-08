@@ -435,21 +435,21 @@
 
 ! -----------------------------------------------------------------------------
 
-      SUBROUTINE OutputInitialParaview()
+  SUBROUTINE OutputInitialParaview()
 
 !
 !     $: Outputs function
 !
 ! -----------------------------------------------------------------------------
-      USE mMesh
-      USE mEqns
-      USE mPar
-      IMPLICIT NONE
+    USE mMesh
+    USE mEqns
+    USE mPar
+    USE parallel
+    IMPLICIT NONE
+    INTEGER itp,i,of,k,j
+    CHARACTER*255 vrstica,tmp
 
-      INTEGER itp,i,of,k,j
-!      CHARACTER*6 cifra
-      CHARACTER*255 vrstica,tmp
-
+    IF (amIroot) THEN
 
       itp=96
 
@@ -566,8 +566,9 @@
 
       CLOSE (itp)
 
+    END IF
 
-      END
+  END
 
 
 !

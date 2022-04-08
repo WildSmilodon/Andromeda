@@ -68,6 +68,7 @@
       INTEGER parYes,parNo
       CHARACTER(255) parLogTekst,parFromAllSidesFileName
       CHARACTER(255) parPPFileName,parRstFileName
+      CHARACTER(200) parLISslvSet
 
       INTEGER parOutInit
       INTEGER parOutMesh
@@ -81,6 +82,8 @@
       INTEGER parNOkeys
       CHARACTER(4), POINTER :: parKey(:)
       CHARACTER(255), POINTER :: parKeyDesc(:)
+
+      INTEGER parQ,parU
 
       PARAMETER (parInputFileName="and.inp")
       PARAMETER (parResultsFileName="and.results.vtu")
@@ -98,6 +101,8 @@
       PARAMETER (parYes=1,parNo=0)
       PARAMETER (parStokes  = 1407)
       PARAMETER (parLaplace = 1973)
+      PARAMETER (parU = 26)
+      PARAMETER (parQ = 73)
 
 !     Post-processing (values along the line projected onto surface)
       INTEGER parOutProfile
@@ -124,7 +129,7 @@ subroutine defineKeys()
 !
 !     Keywords
 !
-  parNOkeys=28
+  parNOkeys=29
   allocate (parKey(parNOkeys))
   allocate (parKeyDesc(parNOkeys))
   parKey(1)="MDIR"
@@ -183,6 +188,8 @@ subroutine defineKeys()
   parKeyDesc(27)="Yes/No - integral of torque at the walls."      
   parKey(28)="FLOP"
   parKeyDesc(28)="flowType x y z e0 e1 e2 e3 - flow over rotated particle"   
+  parKey(29)="LISS"
+  parKeyDesc(29)="LIS library solver settings, i.e. -i bicg -p none -tol 1.0e-8 -maxiter 1000"   
 
 end subroutine
 
@@ -256,6 +263,7 @@ end subroutine
       parSuelE1 = 1.0_rk
       parSuelE2 = 1.0_rk
 
+      parLISslvSet = "-i bicg -p none -tol 1.0e-8 -maxiter 1000"
 
 !
 !     Open input file
@@ -384,6 +392,8 @@ end subroutine
               parFlopUgU(14),parFlopUgU(15),parFlopUgU(16)     ! graU(3,1), graU(3,2), graU(3,3)
           end if
           parFlop = parYes  
+        ELSE IF (KeyWord.EQ.parKey(29)) THEN ! LISS
+          parLISslvSet = OneLine(6:LEN_TRIM(OneLine))
         END IF
 
         CALL rOneTL(lun,OneLine)
@@ -411,11 +421,14 @@ end subroutine
 !
 ! ----------------------------------------------------------------------
 !
-      SUBROUTINE ShowHelp()
+  SUBROUTINE ShowHelp()
 
-      IMPLICIT NONE
+    use parallel
+    IMPLICIT NONE
 
-      INTEGER i
+    INTEGER i
+
+    if (amIroot) then
 
       WRITE (*,'(/A)') "Structure of the 'and.inp' file: 4 letter keyword followed by parameters."
       WRITE (*,'(/A)') "Obligatory keywords:"
@@ -429,19 +442,24 @@ end subroutine
         WRITE (*,'(A4,1X,A)') parKey(i),TRIM(parKeyDesc(i))
       END DO
 
+    end if
 
-      END SUBROUTINE
+  END SUBROUTINE
 
 !
 ! ----------------------------------------------------------------------
 !
 subroutine readCLargs()
 
+  use parallel
+  
   if (COMMAND_ARGUMENT_COUNT().NE.0) THEN
-    call ShowHelp()
-    STOP
+    if (amIroot) then
+      write(*,*) "Command line arguments not expected!"
+      call ShowHelp()
+    end if
+    call StopProgram(.true.)
   end if
-
 !
 !     Try to open input file
 !
@@ -451,9 +469,12 @@ subroutine readCLargs()
   RETURN
 
 10 CONTINUE
-  write(*,*) "Could not open the input file!"
-  call ShowHelp()
-  STOP
+  if (amIroot) then
+    write(*,*) "Could not open the input file!"
+    call ShowHelp()
+  end if
+
+  call StopProgram(.true.)
 
 
 end subroutine
@@ -463,20 +484,24 @@ end subroutine
 !
 ! ----------------------------------------------------------------------
 !
-      SUBROUTINE WriteToLog(tekst)
+  SUBROUTINE WriteToLog(tekst)
 
-      CHARACTER tekst*(*)
-      CHARACTER*6 cas
+  use parallel
+  CHARACTER tekst*(*)
+  CHARACTER*6 cas
 
-      CALL logGetTime(cas)
-      WRITE (parLogLun,'(A6,1X,A)') cas,TRIM(tekst)
-      CALL FLUSH(parLogLun)
+  if (amIroot) then
 
-      IF (parScreenOutput.EQ.parYes) THEN
-        WRITE (6,'(A)') TRIM(tekst)
-      END IF
+    CALL logGetTime(cas)
+    WRITE (parLogLun,'(A6,1X,A)') cas,TRIM(tekst)
+    CALL FLUSH(parLogLun)
+    IF (parScreenOutput.EQ.parYes) THEN
+      WRITE (6,'(A)') TRIM(tekst)
+    END IF
 
-      END SUBROUTINE
+  end if
+
+  END SUBROUTINE
 
 !
 ! ----------------------------------------------------------------------
@@ -485,9 +510,12 @@ end subroutine
 !     Set up log file
 !
 
-      SUBROUTINE SetUpLogFile()
+  SUBROUTINE SetUpLogFile()
 
-      CHARACTER(255) tekst
+    use parallel
+    CHARACTER(255) tekst
+
+    if (amIroot) then
 
       OPEN (parLogLun,FILE=TRIM(parLogFileName),ERR=10,STATUS='UNKNOWN')
 
@@ -496,6 +524,8 @@ end subroutine
       WRITE (tekst,'(A)') parStartTime
       CALL WriteToLog(tekst)
       WRITE (tekst,'(A,A)') "Running on: ",TRIM(ParHostname)
+      CALL WriteToLog(tekst)
+      WRITE (tekst,'(A,I0)') "Number of processes: ",env%nProcs
       CALL WriteToLog(tekst)
 
 
@@ -506,8 +536,10 @@ end subroutine
       WRITE (*,*) "Could not open LOG file!!"
       STOP
 
+    end if
 
-      END SUBROUTINE
+
+  END SUBROUTINE
 
 ! -----------------------------------------------------------------------------
       SUBROUTINE logGetTime(cas)
@@ -545,21 +577,29 @@ end subroutine
 !     Close log file
 !
 
-      SUBROUTINE StopProgram()
+  SUBROUTINE StopProgram(logNotOpen)
+
+      use parallel
+      LOGICAL, OPTIONAL :: logNotOpen
 
       CHARACTER(255) tekst
 
-      CALL DatumInUra(parEndTime)
-      WRITE (tekst,'(A,A)') "START:",TRIM(parStartTime)
-      CALL WriteToLog(tekst)
-      WRITE (tekst,'(A,A)') "END  :",TRIM(parEndTime)
-      CALL WriteToLog(tekst)
+      if (amIroot.AND.(.NOT.present(logNotOpen))) then  
+        CALL DatumInUra(parEndTime)
+        WRITE (tekst,'(A,A)') "START:",TRIM(parStartTime)
+        CALL WriteToLog(tekst)
+        WRITE (tekst,'(A,A)') "END  :",TRIM(parEndTime)
+        CALL WriteToLog(tekst)
 
-      CLOSE (parLogLun)
+        CLOSE (parLogLun)
+      end if
+
+      ! close parallel environment
+      call par_finalize()
 
       STOP
 
-      END SUBROUTINE
+  END SUBROUTINE
 
 
-      END MODULE
+END MODULE

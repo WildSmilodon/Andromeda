@@ -1,16 +1,19 @@
 PROGRAM = Andromeda
 VERSION = 1.5.1
 
-MODOBJECTS = mod_common.o mod_mesh.o mod_trikotnik.o mod_gauss.o mod_par.o mod_eqns.o mod_profile.o mod_linFlowFields.o
+MODOBJECTS = mod_common.o mod_parallel.o mod_plis.o mod_mesh.o mod_trikotnik.o mod_gauss.o mod_par.o mod_eqns.o mod_profile.o mod_linFlowFields.o
 OBJECTSFIX = lib_lsqr.o lib_solveFM.o 
-OBJECTSF90 = Andromeda.o lib_ppLine.o lib_mesh.o lib_int.o lib_domain.o lib_sdBem.o lib_util.o  lib_CRS.o lib_Stokes.o lib_StokesFull.o lib_particle.o
+OBJECTSF90 = Andromeda.o lib_ppLine.o lib_mesh.o lib_int.o lib_domain.o\
+             lib_sdBem.o lib_util.o  lib_CRS.o lib_Stokes.o lib_StokesFull.o\
+		 lib_particle.o lib_StokesLis.o lib_Pressure.o
 
 INST = $(HOME)/bin
 LINS = ../bin
 HOST = $(shell hostname)
 
 # compiler
-FC = gfortran
+#FC = gfortran
+FC = mpif90
 
 # Debug version    
 #OPT = -g -fbounds-check -Wall -fcheck=all
@@ -20,14 +23,15 @@ OPT = -O3
 OPDE= o  
 
 # options
-FCOPTS = -ffixed-line-length-132  -fcray-pointer 
+FCOPTS = -ffixed-line-length-132  -fcray-pointer -cpp  -DUSE_MPI -I../inc
 
 # Blas library
 
 #ifneq (,$(findstring hobbit,$(HOST)))
 #  LDOPTO = /usr/lib/libblas.so
 #else
-  LDOPTO = /usr/lib/x86_64-linux-gnu/blas/libblas.so
+#  LDOPTO = /usr/lib/x86_64-linux-gnu/blas/libblas.so
+  LDOPTO = -lblas -llis -lmpi
 #endif
 
 

@@ -7,6 +7,7 @@
       MODULE mEqns
       
       USE mCommon
+      USE plis
       IMPLICIT NONE
 
 !
@@ -47,6 +48,16 @@
         REAL(rk), POINTER :: v(:)
       END TYPE CRSmatrixType
 
+
+      TYPE DivideNodesType
+            INTEGER, POINTER :: rowTG(:)
+            INTEGER, POINTER :: rowRHS(:)
+            INTEGER, POINTER :: rowSYS(:)
+            INTEGER, POINTER :: UQ(:)
+            INTEGER, POINTER :: een(:)
+            INTEGER, POINTER :: irow(:)
+      END TYPE
+
 !
 ! ----------------------------------------------------------------------
 !
@@ -69,6 +80,9 @@
 
         INTEGER, POINTER :: col(:) ! ! position in x or b vector
         INTEGER, POINTER :: qcol(:) ! ! position in x or b vector
+
+        TYPE(systemLinEq) sle ! system to be solved with LIS library
+        TYPE(DivideNodesType) dn ! nodes divided between processes
 
       END TYPE
 

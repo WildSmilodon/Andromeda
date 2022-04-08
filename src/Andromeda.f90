@@ -14,17 +14,25 @@ program Andromeda
       USE mEqns
       use linFlowFields
       use mCommon
-!
+      use parallel
+      use plis 
+#include "lisf.h" 
+
 !     Local vars
 !
       INTEGER i
-      logical crs ! te
+      CHARACTER(123) SLEtype ! te
+      REAL ts,te
 !
 !     Name and version of the code
 !
       parIDname='Andromeda'
       parIDversion='1.6'
       parIDdate='April 2022'
+!
+!     Init parallel environment
+!      
+      call par_init()
 !
 !     Get start time and computer name
 !
@@ -87,9 +95,85 @@ program Andromeda
 !
       IF (parOutInit.EQ.parYes) CALL OutputInitialParaview()
 !
-!     Integrate
+!     Start
 !
-      IF (parPrType .EQ. parStokes) THEN
+      SLEtype = "lis"
+      !SLEtype = "lisFull"
+      !SLEtype = "crs"
+      !SLEtype = "full"
+      !crs = .false.
+      
+
+      if (parPrType .EQ. parStokes .AND. SLEtype.EQ."lis") then
+            CALL WriteToLog("Preparing a SLE for all 3 directions!")
+!
+!           Set up X and RHS vectors (for 3 individual X,Y,Z equations)
+!
+            CALL sdSetUpXandB()
+!
+!           Make a big system of equation for all 3 directions
+!                                     
+            CALL StokesBigSystemXB()              
+!
+!           Set system matrix size and disribution across processors
+!
+            call plis_setup_A(stk%sle,stk%neq)
+            call DivideRows()
+!
+!           Set solver options
+!                              
+            CALL WriteToLog("LIS solver options: "//TRIM(parLISslvSet))
+            CALL plis_createSolver(stk%sle)            
+!
+!           Form CRS system and rhs matrices
+!
+            CALL stokesFormLISsysMrhsMcsrDiv()  ! LIS parallel VERSION
+!            
+!           Solve the system                  
+!        
+            CALL StokesBigSystemSOLVElis() ! LIS parallel VERSION
+!
+!           Use explicit calculation for pressure
+!                                    
+            CALL pressureStokesLIS()
+      end if      
+
+
+      if (parPrType .EQ. parStokes .AND. SLEtype.EQ."lisFull") then
+            CALL WriteToLog("Preparing a SLE for all 3 directions!")
+!
+!           Set up X and RHS vectors (for 3 individual X,Y,Z equations)
+!
+            CALL sdSetUpXandB()
+!
+!           Make a big system of equation for all 3 directions
+!                                     
+            CALL StokesBigSystemXB()              
+!
+!           Set system matrix size and disribution across processors
+!
+            call plis_setup_A(stk%sle,stk%neq)
+!
+!           Set solver options
+!                              
+            CALL plis_createSolver(stk%sle)            
+!
+!           Integrate
+!
+            CALL WriteToLog("Integration!")
+            CALL CoR_Integrals_Stokes()                        
+!
+!           Form CRS system and rhs matrices
+!                        
+            CALL stokesFormLISsysMrhsMcsr()  ! LIS parallel VERSION
+!            
+!           Solve the system                  
+!        
+            CALL StokesBigSystemSOLVElis() ! LIS parallel VERSION
+
+      end if     
+
+      IF (parPrType .EQ. parStokes.AND..NOT.(SLEtype.EQ."lis").AND..NOT.(SLEtype.EQ."lisFull")) THEN
 !
 !           Integrate
 !
@@ -102,18 +186,18 @@ program Andromeda
 !           Make a big system of equation for all 3 directions
 !                         
             CALL WriteToLog("Setting up System and RHS matrices from MEMORY!")
-            CALL StokesBigSystemXB()               
+            CALL StokesBigSystemXB()                   
 !
 !           Solve
 !                                    
-           crs = .true.
-           !crs = .false.
-
-           if (crs) then
+           if (SLEtype.EQ."crs") then
 !
 !                 Form CRS system and rhs matrices
 !                        
+                  CALL CPU_TIME(ts)
                   CALL stokesFormCRSsysMrhsM()  ! CRS VERSION
+                  CALL CPU_TIME(te)
+                  Print *,"stokesFormCRSsysMrhsM",te-ts                     
 
                   IF (parTrii.EQ.parYes) THEN
                         CALL WriteToLog("Solving ... Stokes 3 sides inlet run!") 
@@ -134,11 +218,15 @@ program Andromeda
 
                   IF (parSval.EQ.parNo.AND.parTrii.EQ.parNo.AND.parFlop.EQ.parNo) THEN
                         CALL WriteToLog("Solving ...") 
+                        CALL CPU_TIME(ts)
                         CALL StokesBigSystemSOLVEcrs() ! CRS VERSION
+                        CALL CPU_TIME(te)
+                        Print *,"StokesBigSystemSOLVEcrs",te-ts       
                   END IF                  
 
 
-           else
+            end if
+            if (SLEtype.EQ."full") then
 !
 !                 Form FULL system and rhs matrices
 !    
@@ -156,11 +244,12 @@ program Andromeda
                         CALL StokesBigSystemSOLVE()
                   END IF
 
-
-
            endif
 
+           CALL CPU_TIME(ts)
            call pressureStokes() 
+           CALL CPU_TIME(te)
+           Print *,"pressureStokes",te-ts
 
       END IF
 
@@ -211,7 +300,7 @@ program Andromeda
 !
 !     Write restart file
 !
-      IF (parOutRest.EQ.parYes) CALL WriteRestartFile()
+      IF (parOutRest.EQ.parYes.AND.amIroot) CALL WriteRestartFile()
 !
 !     Start postprocessing
 !
@@ -219,19 +308,21 @@ program Andromeda
 !
 !     Output results
 !
-      IF (parOutProfile.EQ.parYes) CALL linePostProcessing()
-      IF (parOutPiec.EQ.parYes) CALL OutputPiecesParaview()
-      IF (parOutMesh.EQ.parYes) CALL OutputMeshParaview()
-      IF (parOutStoc.EQ.parYes) CALL OutputStochastic()
-      IF (parOutDomainProfile.EQ.parYes) CALL OutputDomainProfile()
+      IF (parOutProfile.EQ.parYes.AND.amIroot) CALL linePostProcessing()
+      IF (parOutPiec.EQ.parYes.AND.amIroot) CALL OutputPiecesParaview()
+      IF (parOutMesh.EQ.parYes.AND.amIroot) CALL OutputMeshParaview()
+      IF (parOutStoc.EQ.parYes.AND.amIroot) CALL OutputStochastic()
+      IF (parOutDomainProfile.EQ.parYes.AND.amIroot) CALL OutputDomainProfile()
 
-      IF (parQinw.EQ.parYes) CALL IntegrateFluxes()
-      IF (parUinw.EQ.parYes) CALL IntegrateFunction()
-      IF (parTinw.EQ.parYes) CALL IntegrateTorques()
+      IF (parQinw.EQ.parYes.AND.amIroot) CALL IntegrateFluxes()
+      IF (parUinw.EQ.parYes.AND.amIroot) CALL IntegrateFunction()
+      IF (parTinw.EQ.parYes.AND.amIroot) CALL IntegrateTorques()
 
+
+123   continue      
 !
 !     Close log file
 !
-      CALL StopProgram
+      CALL StopProgram()
 
 end program Andromeda

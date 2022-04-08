@@ -20,13 +20,17 @@ doi:10.1016/j.enganabound.2020.11.010
 
 ```
 sudo apt-get update
-sudo apt install gfortran make libblas-dev liblapack-dev
+sudo apt install gfortran make libblas-dev liblapack-dev mpich
 git clone https://github.com/WildSmilodon/Andromeda.git
 cd Andromeda/src
 make
 cd ../run
 ./runAll
 ```
+### Uses LIS, blas and mpich libraries
+
+Download and installation of LIS library from: https://www.ssisc.org/lis
+with modified header file, see ```./inc/lisf.h```
 
 
 ### Paraview is used for results postprocessing

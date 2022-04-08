@@ -1,7 +1,7 @@
 !
 !     ------------------------------------------------------------------
 !
-SUBROUTINE pressureStokes()
+SUBROUTINE pressureStokes() ! NE DELA ZA TRI MREZE !!!
 
   USE mMesh
   USE mEqns
@@ -25,7 +25,7 @@ SUBROUTINE pressureStokes()
   !
   ! Loop over subdomains
   !
-  isd=1
+  isd = 1
   row = 0
 
   DO i = nnodes+1,nnodes+nqnodes
@@ -397,7 +397,6 @@ SUBROUTINE StokesBigSystemSOLVEcrs()
   !
   ALLOCATE (b(stk%neq))              
   call CRSxV(stk%rhsMcrs,stk%b,stk%nb,b)
-
   !
   ! Solve with LSQR solver
   !
@@ -496,7 +495,7 @@ SUBROUTINE stokesFormCRSsysMrhsM()
         ! Use this equation only, if function is unknown
         !
         IF (bc.EQ.iFlux.OR.bc.EQ.iContact) THEN
-          row = row + 1
+          row = row + 1          
           stk%sysMcrs%i(row)=stk%sysMcrs%nnz + 1 ! line start        
           stk%rhsMcrs%i(row)=stk%rhsMcrs%nnz + 1 ! line start        
           !
@@ -539,7 +538,7 @@ SUBROUTINE stokesFormCRSsysMrhsM()
         ! Use this equation only, if flux is unknown
         !
         IF (bc.EQ.iFunction.OR.bc.EQ.iContact) THEN
-          row=row+1      
+          row=row+1                
           stk%sysMcrs%i(row)=stk%sysMcrs%nnz + 1 ! line start        
           stk%rhsMcrs%i(row)=stk%rhsMcrs%nnz + 1 ! line start          
           !
@@ -1156,9 +1155,6 @@ SUBROUTINE StokesBigSystemXB()
 
 
   WRITE(stk%name,'(3A)') TRIM(eqn(1)%name),TRIM(eqn(2)%name),TRIM(eqn(3)%name)
-
-
-
   !
   !   Shift column values from 3 small SLE (eqn%) to one large (stk%)
   !              
@@ -1218,6 +1214,112 @@ SUBROUTINE StokesBigSystemXB()
       END DO ! en        
     END DO ! q source point
   END DO ! subdomains
+!
+! Report to log file
+!
+  CALL WriteToLog("")
+  CALL WriteToLog("--------------------")
+  WRITE (parLogTekst,'(A,A)') "Equation = ", TRIM(stk%name)
+  CALL WriteToLog(parLogTekst)
+  WRITE (parLogTekst,'(A,I0,A,I0,A)') "System matrix = ",stk%neq, " x ",stk%nx
+  CALL WriteToLog(parLogTekst)
+  WRITE (parLogTekst,'(A,I0,A,I0,A)') "RHS    matrix = ",stk%neq, " x ",stk%nb
+  CALL WriteToLog(parLogTekst)
+
+!
+!           Alocate vectors of unknowns and knowns
+!
+  ALLOCATE (stk%x(stk%nx))
+  ALLOCATE (stk%Pivot(stk%nx))
+  ALLOCATE (stk%b(stk%nb))      
+
+
+END
+  
+
+!
+!     ------------------------------------------------------------------
+!
+SUBROUTINE StokesBigSystemXBnew()
+  USE mMesh
+  USE mEqns
+  USE mPar
+
+  IMPLICIT NONE
+  INTEGER i,en,isp,ispL,isd,myWall,bc
+
+  ALLOCATE (stk%boundary(nofw))
+  ALLOCATE (stk%initial(nofw))
+  ALLOCATE (stk%u(3*nnodes))
+  ALLOCATE (stk%q(3*nqnodes))
+  ALLOCATE (stk%col(3*nnodes))
+  ALLOCATE (stk%qcol(3*nqnodes))
+
+
+  WRITE(stk%name,'(3A)') TRIM(eqn(1)%name),TRIM(eqn(2)%name),TRIM(eqn(3)%name)
+
+
+
+  !
+  !   Shift column values from 3 small SLE (eqn%) to one large (stk%)
+  !              
+  DO isd=1,nosd
+    !
+    ! Function source points
+    !
+    DO i = 1,subdomain(isd)%nnodes
+      isp = subdomain(isd)%nodeList(i)  ! source point in the small system
+      myWall = subdomain(isd)%BCidList(i)
+      !
+      ! Loop over all three small systems
+      !
+      stk%nx = 0
+      stk%nb = 0
+      stk%neq = 0
+      DO en=1,neq
+        ispL = isp + (en-1)*nnodes ! source point number in the large system       
+        bc = eqn(en)%boundary(myWall)%known 
+        IF (bc.EQ.iFunction) THEN           
+          ! function is known
+          print *,en,stk%nb,eqn(en)%col(isp) 
+          stk%col(ispL) = stk%nb  + eqn(en)%col(isp) 
+        ELSE IF (bc.EQ.iFlux.OR.bc.EQ.iContact) THEN
+          ! function is unknown 
+          stk%col(ispL) = stk%nx  + eqn(en)%col(isp) 
+        END IF
+        stk%nx = stk%nx + eqn(en)%nx ! number of unknowns (=cols in sysM)
+        stk%nb = stk%nb + eqn(en)%nb ! number of equations (=rows in sys matrix)
+        stk%neq = stk%neq + eqn(en)%neq ! number of rows in rhs vector  (=cols in rhs matrix)           
+      END DO ! en
+    END DO ! u source point
+    !      
+    ! Flux source points
+    !        
+    DO i = 1,subdomain(isd)%nqnodes
+      isp = subdomain(isd)%qnodeList(i)  ! source point      
+      myWall = subdomain(isd)%qBCidList(i)
+      !
+      ! Loop over all three small systems
+      !
+      stk%nx = 0
+      stk%nb = 0
+      stk%neq = 0
+      DO en=1,neq        
+        ispL = isp + (en-1)*nqnodes! source point number in the large system        
+        bc = eqn(en)%boundary(myWall)%known
+        IF (bc.EQ.iFunction.OR.bc.EQ.iContact) THEN
+          ! flux is unknown
+          stk%qcol(ispL) = stk%nx  + eqn(en)%qcol(isp)
+        ELSE IF (bc.EQ.iFlux) THEN
+          ! flux is known
+          stk%qcol(ispL) = stk%nb  + eqn(en)%qcol(isp)
+        END IF
+        stk%nx = stk%nx + eqn(en)%nx ! number of unknowns (=cols in sysM)
+        stk%nb = stk%nb + eqn(en)%nb ! number of equations (=rows in sys matrix)
+        stk%neq = stk%neq + eqn(en)%neq ! number of rows in rhs vector  (=cols in rhs matrix)    
+      END DO ! en        
+    END DO ! q source point
+  END DO ! subdomains
    
   
 !
@@ -1241,7 +1343,7 @@ SUBROUTINE StokesBigSystemXB()
 
 END
   
-  
+    
 
 
 !
@@ -1587,9 +1689,6 @@ SUBROUTINE sdIntRowQStokes(isd,irow, &
                 rowTyz(element(ie)%con(j)) = rowTyz(element(ie)%con(j)) + Tyz(j)
                 rowTzz(element(ie)%con(j)) = rowTzz(element(ie)%con(j)) + Tzz(j)
 
-                rowprTx(element(ie)%con(j)) = rowprTx(element(ie)%con(j)) + prTx(j)
-                rowprTy(element(ie)%con(j)) = rowprTy(element(ie)%con(j)) + prTy(j)
-                rowprTz(element(ie)%con(j)) = rowprTz(element(ie)%con(j)) + prTz(j)
             END DO
 
             rowGxx(ie) = Gxx
@@ -1599,16 +1698,29 @@ SUBROUTINE sdIntRowQStokes(isd,irow, &
             rowGyz(ie) = Gyz
             rowGzz(ie) = Gzz
 
+          if (isrc.eq.0) then
+            DO j=1,element(ie)%nno
+              rowprTx(element(ie)%con(j)) = rowprTx(element(ie)%con(j)) + prTx(j)
+              rowprTy(element(ie)%con(j)) = rowprTy(element(ie)%con(j)) + prTy(j)
+              rowprTz(element(ie)%con(j)) = rowprTz(element(ie)%con(j)) + prTz(j)
+            END DO            
+
             rowprGx(ie) = prGx
             rowprGy(ie) = prGy
             rowprGz(ie) = prGz
+          end if
 
             DEALLOCATE (Txx,Txy,Txz,Tyy,Tyz,Tzz,prTx,prTy,prTz)
   
             END IF
         END DO ! nbelem in wall
     END DO ! walls in subdomain
-  
+ 
+    
+!
+!   Set integration error
+!        
+    err = -9.99_rk    
 !
 !       Find c parameter : must be 0.5 since source point is in the middle of element
 !
@@ -1685,7 +1797,22 @@ SUBROUTINE sdIntRowQStokes(isd,irow, &
 
 ! Correct pressure Q
 
-
+   !
+   !  Estimate singular integral
+   !
+    cx = 0.0_rk
+    cy = 0.0_rk
+    cz = 0.0_rk
+    do j = 1,nnodes
+       cx = cx + rowprTx(j)
+       cy = cy + rowprTy(j)
+       cz = cz + rowprTz(j)
+    end do
+    DO j=1,element(irow)%nno
+       rowprTx(element(irow)%con(j)) = rowprTx(element(irow)%con(j)) - cx / element(irow)%nno      
+       rowprTy(element(irow)%con(j)) = rowprTy(element(irow)%con(j)) - cy / element(irow)%nno   
+       rowprTz(element(irow)%con(j)) = rowprTz(element(irow)%con(j)) - cz / element(irow)%nno         
+    END DO   
     
 !    cx = 0.0_rk
 !    cy = 0.0_rk

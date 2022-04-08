@@ -6,12 +6,12 @@
 MDIR ./
 
 # Mesh file
-#LGEO ../mesh/kocka-000-111-152-150_hex.msh
+#LGEO ../../mesh/kocka-000-111-152-150_hex.msh
 #LGEO ../mesh/kocka-000-111-602-600_hex.msh
-LGEO ../../mesh/kocka-000-111-2402-2400_hex.msh
-#LGEO ../mesh/kocka-000-111-314-624_tri.msh
+#LGEO ../../mesh/kocka-000-111-2402-2400_hex.msh
+LGEO ../../mesh/kocka-000-111-314-624_tri.msh
 #LGEO ../mesh/kocka-000-111-760-1516_tri.msh
-#LGEO ../mesh/kocka-000-111-3080-6156_tri.msh
+#LGEO ../../mesh/kocka-000-111-3080-6156_tri.msh
 
 # BiC file
 LBIC stokesPoiseuille-X.bic 

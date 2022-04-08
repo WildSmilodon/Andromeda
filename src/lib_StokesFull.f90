@@ -210,7 +210,9 @@ SUBROUTINE formStokesSysRhsMatrices(sysM,rhsM)
       ! Use this equation only, if function is unknown
       !
       IF (bc.EQ.iFlux.OR.bc.EQ.iContact) THEN
-        row = row + 1        
+        !row = row + 1  
+        !print *,row,stk%col(subdomain(isd)%nodeList(i) + (een-1)*nnodes)   , "fff" 
+        row = stk%col(subdomain(isd)%nodeList(i) + (een-1)*nnodes)
         !
         !  For a single row in matrices
         !
@@ -243,7 +245,9 @@ SUBROUTINE formStokesSysRhsMatrices(sysM,rhsM)
       ! Use this equation only, if flux is unknown
       !
       IF (bc.EQ.iFunction.OR.bc.EQ.iContact) THEN
-        row=row+1      
+        !row=row+1    
+        !print *,row,stk%qcol(subdomain(isd)%qnodeList(i) + (een-1)*nqnodes)   , "ggg"
+        row = stk%qcol(subdomain(isd)%qnodeList(i) + (een-1)*nqnodes) 
         !
         !  For a single row in matrices
         !
@@ -509,7 +513,7 @@ SUBROUTINE StokesBigSystemSOLVE()
   USE mCommon
   IMPLICIT NONE
 
-  INTEGER nits,ierr,isd
+  INTEGER nits,ierr,isd,i
   REAL(rk)    cput
   REAL(rk), ALLOCATABLE :: sysM(:,:),rhsM(:,:),b(:)
 
@@ -535,11 +539,10 @@ SUBROUTINE StokesBigSystemSOLVE()
   ALLOCATE (b(stk%neq))              
   b = MATMUL(rhsM,stk%b)
   DEALLOCATE(rhsM)
-
+  
   !
   ! solve
   !
-
   ierr=0
   cput=0.0
   nits=0
