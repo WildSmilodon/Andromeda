@@ -1656,7 +1656,7 @@ SUBROUTINE sdIntRowQStokes(isd,irow, &
   !
   !             Set recursion depth for singular triangles
   !
-                IntRecDepth=parTriRecur
+                IntRecDepth = parTriRecur
   
                 CALL Triangle_StokesInt(x1,y1,z1,x2,y2,z2,x3,y3,z3,sx,sy,sz, &
                     subdomain(isd)%normMul(jj)*element(ie)%normal(1), &
@@ -1698,6 +1698,7 @@ SUBROUTINE sdIntRowQStokes(isd,irow, &
             rowGyz(ie) = Gyz
             rowGzz(ie) = Gzz
 
+
           if (isrc.eq.0) then
             DO j=1,element(ie)%nno
               rowprTx(element(ie)%con(j)) = rowprTx(element(ie)%con(j)) + prTx(j)
@@ -1708,6 +1709,7 @@ SUBROUTINE sdIntRowQStokes(isd,irow, &
             rowprGx(ie) = prGx
             rowprGy(ie) = prGy
             rowprGz(ie) = prGz
+
           end if
 
             DEALLOCATE (Txx,Txy,Txz,Tyy,Tyz,Tzz,prTx,prTy,prTz)
@@ -1724,6 +1726,7 @@ SUBROUTINE sdIntRowQStokes(isd,irow, &
 !
 !       Find c parameter : must be 0.5 since source point is in the middle of element
 !
+!    end if
 
 
 !    Check solution : integral n_k T_ijk naj bi bil ..., Pozdrikis en. 7.2.20
@@ -1745,7 +1748,6 @@ SUBROUTINE sdIntRowQStokes(isd,irow, &
 !    if (cx>5.0E-5_rk.or.cy>5.0E-5_rk.or.cz>5.0E-5_rk) then
 !      write(*,*) "Qsp: TxyTxzTyz integrals verify",cx,cy,cz
 !      write(*,*) "sp=",sx,sy,sz 
-!    end if
 
 !
 !   Get singular integral : integral n_k T_ijk naj bi bil ..., Pozdrikis en. 7.2.20
@@ -1832,6 +1834,19 @@ SUBROUTINE sdIntRowQStokes(isd,irow, &
    ! rowprTy(irow) = rowprTy(irow) + cy 
    ! rowprTz(irow) = rowprTz(irow) + cz 
    ! print *,rowprTx(irow),rowprTy(irow),rowprTz(irow)
+
+!    cx = 0.0_rk
+!    cy = 0.0_rk
+!    cz = 0.0_rk
+!    DO i=1,nnodes
+!        cx = cx - ( rowGxx(i) )
+!        cy = cy - ( rowGyy(i) )
+!        cz = cz - ( rowGzz(i) )
+!    END DO
+!    !print *,cx,cy,cz
+!    rowGxx(ie) = rowGxx(ie) + cx 
+!    rowGyy(ie) = rowGyy(ie) + cy
+!    rowGzz(ie) = rowGzz(ie) + cz
 
 END SUBROUTINE
   

@@ -43,6 +43,11 @@ WINT No
 # Torque calculation at walls
 TINW Yes
 
+# LIS solver settings
+#LISS -i bicgstab -p jacobi -tol 1.0e-8 -maxiter 1000 -print all
+LISS -i bicgstab -p jacobi -tol 1.0e-8 -maxiter 1000
+
+
 # Transform mesh to superellipsoid
 #SUEL 2.0 1.0 1.0 1.0 1.0
 # 2:1:1, V=pi/6

@@ -263,7 +263,7 @@ end subroutine
       parSuelE1 = 1.0_rk
       parSuelE2 = 1.0_rk
 
-      parLISslvSet = "-i bicg -p none -tol 1.0e-8 -maxiter 1000"
+      parLISslvSet = "-i bicgstab -p jacobi -tol 1.0e-8 -maxiter 1000"
 
 !
 !     Open input file

@@ -125,13 +125,17 @@ program Andromeda
             CALL WriteToLog("LIS solver options: "//TRIM(parLISslvSet))
             CALL plis_createSolver(stk%sle)            
 !
-!           Form CRS system and rhs matrices
+!           Integrate & form system and r.h.s matrices
 !
-            CALL stokesFormLISsysMrhsMcsrDiv()  ! LIS parallel VERSION
+            CALL stokesFormLISsysMrhsMcsrDiv()
+!
+!           Use boundary conditions to set up left and right hand side vectors
+!
+            CALL formStokesLeftRightHandSideVectors()            
 !            
 !           Solve the system                  
 !        
-            CALL StokesBigSystemSOLVElis() ! LIS parallel VERSION
+            CALL StokesBigSystemSOLVElis()
 !
 !           Use explicit calculation for pressure
 !                                    
@@ -177,7 +181,11 @@ program Andromeda
 !
 !           Integrate
 !
+            CALL CPU_TIME(ts)
             CALL CoR_Integrals_Stokes()
+            CALL CPU_TIME(te)
+            WRITE (parLogTekst,'(A,F10.4)') "TIMER :: CoR_Integrals_Stokes [s] = ",te-ts
+            CALL WriteToLog(parLogTekst)            
 !
 !           Set up X and RHS vectors (for 3 individual X,Y,Z equations)
 !
@@ -197,8 +205,9 @@ program Andromeda
                   CALL CPU_TIME(ts)
                   CALL stokesFormCRSsysMrhsM()  ! CRS VERSION
                   CALL CPU_TIME(te)
-                  Print *,"stokesFormCRSsysMrhsM",te-ts                     
-
+                  WRITE (parLogTekst,'(A,F10.4)') "TIMER :: stokesFormCRSsysMrhsM [s] = ",te-ts
+                  CALL WriteToLog(parLogTekst)
+               
                   IF (parTrii.EQ.parYes) THEN
                         CALL WriteToLog("Solving ... Stokes 3 sides inlet run!") 
                         CALL StokesInlet3sidesForceCRS() ! CRS VERSION
@@ -221,7 +230,9 @@ program Andromeda
                         CALL CPU_TIME(ts)
                         CALL StokesBigSystemSOLVEcrs() ! CRS VERSION
                         CALL CPU_TIME(te)
-                        Print *,"StokesBigSystemSOLVEcrs",te-ts       
+                        WRITE (parLogTekst,'(A,F10.4)') "TIMER :: StokesBigSystemSOLVEcrs [s] = ",te-ts
+                        CALL WriteToLog(parLogTekst)
+         
                   END IF                  
 
 
@@ -249,7 +260,8 @@ program Andromeda
            CALL CPU_TIME(ts)
            call pressureStokes() 
            CALL CPU_TIME(te)
-           Print *,"pressureStokes",te-ts
+           WRITE (parLogTekst,'(A,F10.4)') "TIMER :: pressureStokes [s] = ",te-ts
+           CALL WriteToLog(parLogTekst)
 
       END IF
 

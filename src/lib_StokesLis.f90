@@ -18,7 +18,7 @@ SUBROUTINE StokesBigSystemSOLVElis()
   !
   ! Set up left and right hand side vectors
   !
-  call formStokesLeftRightHandSideVectors()
+  !call formStokesLeftRightHandSideVectors()
   !
   ! Calculate b = rhsM * rhsVector
   !
@@ -161,6 +161,58 @@ SUBROUTINE DivideRows()
 END subroutine
 
 
+!
+!     ------------------------------------------------------------------
+!
+SUBROUTINE verifyLISintegrals(integralsAvailable)
+
+  USE mMesh
+  USE mEqns
+  USE mPar
+  USE mCommon
+  USE parallel
+  USE plis
+  IMPLICIT NONE
+      
+
+  INTEGER, PARAMETER :: lun = 12
+  CHARACTER(255) fileName
+  LOGICAL integralsAvailable
+  INTEGER myIntegralsAvailable,totIntegralsAvailable
+  INTEGER ver(8)
+  INTEGER ierr
+    
+  CALL WriteToLog("Looking for integrals files on hard disk!")
+  WRITE(fileName,'(A,A,I0,A,I0)')  TRIM(parIntegralsFileName),".",env%myRank,"-",env%nProcs  
+  OPEN (lun,FILE=TRIM(fileName),FORM='UNFORMATTED',STATUS='OLD', ERR = 10)
+  READ(lun) ver(1),ver(2),ver(3),ver(4),ver(5),ver(6),ver(7),ver(8)
+  IF (ver(1).EQ.parStokes.AND. &
+      ver(2).EQ.env%myRank.AND. &
+      ver(3).EQ.env%nProcs.AND. &
+      ver(4).EQ.stk%neq.AND. &
+      ver(5).EQ.stk%nb.AND. &
+      ver(6).EQ.stk%sle%is.AND. &
+      ver(7).EQ.stk%sle%ie.AND. &
+      ver(8).EQ.stk%sle%n) THEN
+        myIntegralsAvailable = 1
+        GOTO 20      
+  END IF  
+10 CONTINUE ! error occured
+  myIntegralsAvailable = 0
+20 CONTINUE  
+  CLOSE(lun)
+  !
+  !  Send info on integrals on all prcessors
+  !
+  CALL MPI_ALLREDUCE(myIntegralsAvailable, totIntegralsAvailable, 1, MPI_INTEGER, MPI_SUM, env%comm, ierr)
+  IF (totIntegralsAvailable.EQ.env%nProcs) THEN 
+    integralsAvailable = .TRUE.
+    CALL WriteToLog("Integrals found!")
+  ELSE
+    integralsAvailable = .FALSE.
+    CALL WriteToLog("Integrals not found!")
+  END IF
+END subroutine
 
 !
 !     ------------------------------------------------------------------
@@ -179,12 +231,42 @@ SUBROUTINE stokesFormLISsysMrhsMcsrDiv()
   REAL(rk), ALLOCATABLE :: sysMrow(:),rhsMrow(:)
   REAL ts,te
   INTEGER nnz
+  INTEGER dummy
+  INTEGER, PARAMETER :: lun = 12
+  CHARACTER(255) fileName
+  LOGICAL integralsAvailable
     
   CALL CPU_TIME(ts)
   !
   ! Form matrices
   !
-  CALL WriteToLog("Stokes: forming LIS system and rhs matrices in CSR format.")      
+  CALL WriteToLog("Stokes: forming LIS system and rhs matrices in CSR format.")     
+  !
+  !  Do integrals exist on hard disk?
+  ! 
+  CALL verifyLISintegrals(integralsAvailable)  
+  !
+  !  Am I writing to disk?
+  !
+  IF ( (.NOT.integralsAvailable) .AND. (parWriteIntegrals.EQ.parYes) ) THEN
+    CALL WriteToLog("Will write integrals to disk!")
+    WRITE(fileName,'(A,A,I0,A,I0)')  TRIM(parIntegralsFileName),".",env%myRank,"-",env%nProcs
+
+    OPEN (lun,FILE=TRIM(fileName),FORM='UNFORMATTED',STATUS='UNKNOWN')
+    WRITE (lun) parStokes,env%myRank,env%nProcs,stk%neq,stk%nb,stk%sle%is,stk%sle%ie,stk%sle%n
+  END IF
+  !
+  !  Reading from disk
+  !
+  IF (integralsAvailable) THEN
+    CALL WriteToLog("Reading integrals from disk!")
+    WRITE(fileName,'(A,A,I0,A,I0)')  TRIM(parIntegralsFileName),".",env%myRank,"-",env%nProcs
+    OPEN (lun,FILE=TRIM(fileName),FORM='UNFORMATTED',STATUS='OLD')
+    READ (lun) dummy,dummy,dummy,dummy,dummy,dummy,dummy,dummy
+  ELSE
+    CALL WriteToLog("Calculating integrals!")
+  END IF
+
   !
   !  Form single rows for system and rhs matrices
   !
@@ -221,18 +303,27 @@ SUBROUTINE stokesFormLISsysMrhsMcsrDiv()
   isd = 1 ! single subdomain only  
   
   DO i = 1,stk%sle%n
-    IF (stk%dn%UQ(i) .EQ. parU) THEN
-      !
-      ! Function source points
-      !
-      !CALL formUrow(isd,stk%dn%een(i),stk%dn%rowTG(i),sysMrow,rhsMrow)
-      CALL formUrowFly(isd,stk%dn%een(i),stk%dn%irow(i),sysMrow,rhsMrow)
-    ELSE 
-      !        
-      ! Flux source points
-      !
-      !CALL formQrow(isd,stk%dn%een(i),stk%dn%rowTG(i),sysMrow,rhsMrow)
-      CALL formQrowFly(isd,stk%dn%een(i),stk%dn%irow(i),sysMrow,rhsMrow)
+    IF (integralsAvailable) THEN
+      ! Read
+      CALL rdvec(lun,stk%neq,sysMrow)
+      CALL rdvec(lun,stk%nb,rhsMrow)      
+    ELSE    
+      ! Calculate  
+      IF (stk%dn%UQ(i) .EQ. parU) THEN
+        !
+        ! Function source points
+        !
+        CALL formUrowFly(isd,stk%dn%een(i),stk%dn%irow(i),sysMrow,rhsMrow)
+      ELSE 
+        !        
+        ! Flux source points
+        !
+        CALL formQrowFly(isd,stk%dn%een(i),stk%dn%irow(i),sysMrow,rhsMrow)
+      END IF
+      IF (parWriteIntegrals.EQ.parYes) THEN
+        CALL wrvec(lun,stk%neq,sysMrow)
+        CALL wrvec(lun,stk%nb,rhsMrow)
+      END IF
     END IF
     !
     ! Copy row to system matrix
@@ -247,7 +338,6 @@ SUBROUTINE stokesFormLISsysMrhsMcsrDiv()
       call plis_set_RHSmatrix_element(stk%sle,stk%dn%rowRHS(i),col,rhsMrow(col))
     END DO 
   END DO
-
   !
   ! Free memory
   !
@@ -256,6 +346,13 @@ SUBROUTINE stokesFormLISsysMrhsMcsrDiv()
   !  Assemble CRS structure of the system matrix
   !
   CALL plis_assemble_system_matrix_csr(nnz,stk%sle)  
+  !
+  !  Close integrals file
+  !
+  IF ( (integralsAvailable).OR.( (.NOT.integralsAvailable) .AND. (parWriteIntegrals.EQ.parYes) ) ) THEN
+    CALL WriteToLog("Closing integrals files!")
+    CLOSE(lun)
+  END IF  
   !
   !  Write to log
   ! 
