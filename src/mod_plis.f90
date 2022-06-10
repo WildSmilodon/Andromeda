@@ -12,10 +12,10 @@ module plis
       LIS_INTEGER n    ! number of rows on processor
       LIS_INTEGER is,ie! start row and end row + 1      
 
-      LIS_INTEGER nnz
-      LIS_MATRIX A
-      LIS_SOLVER solver
-      LIS_VECTOR b,x
+      LIS_INTEGER nnz    
+      LIS_MATRIX A      ! system matrix
+      LIS_SOLVER solver ! pointer to solver
+      LIS_VECTOR b,x    ! r.h.s. and solution vectors
 
       REAL(rk), POINTER :: rhsM(:,:) ! parallel version of rectangular RHS matrix
       INTEGER nb

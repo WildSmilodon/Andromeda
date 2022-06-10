@@ -507,14 +507,20 @@ SUBROUTINE SetUpSubdomains()
 !
 !             Set recursion depth for singular triangles
 !
-              IntRecDepth=parTriRecur
-
-              CALL Triangle_BEMInt(x1,y1,z1,x2,y2,z2,x3,y3,z3,sx,sy,sz, &
+!              IntRecDepth=parTriRecur
+!
+!              CALL Triangle_BEMInt(x1,y1,z1,x2,y2,z2,x3,y3,z3,sx,sy,sz, &
+!                              subdomain(isd)%normMul(jj)*element(ie)%normal(1), &
+!                              subdomain(isd)%normMul(jj)*element(ie)%normal(2), & 
+!                              subdomain(isd)%normMul(jj)*element(ie)%normal(3), &
+!                              element(ie)%area,integ,inteH(1),inteH(2),inteH(3),isrc,IntRecDepth)
+!
+!             ANALYTIC EVAL OF SINGULAR INTEGRALS
+              CALL Triangle_BEMIntAnal(x1,y1,z1,x2,y2,z2,x3,y3,z3,sx,sy,sz, &
                               subdomain(isd)%normMul(jj)*element(ie)%normal(1), &
-                              subdomain(isd)%normMul(jj)*element(ie)%normal(2), & 
+                              subdomain(isd)%normMul(jj)*element(ie)%normal(2), &
                               subdomain(isd)%normMul(jj)*element(ie)%normal(3), &
-                              element(ie)%area,integ,inteH(1),inteH(2),inteH(3),isrc,IntRecDepth)
-
+                              element(ie)%area,integ,inteH(1),inteH(2),inteH(3),isrc)                              
 
             ELSE IF (element(ie)%type.EQ.3) THEN ! 4 node quad
 
@@ -522,8 +528,11 @@ SUBROUTINE SetUpSubdomains()
               y4=node(element(ie)%con(4))%x(2)
               z4=node(element(ie)%con(4))%x(3)
 
-              CALL Quad_BEMInt(x1,y1,z1,x2,y2,z2,x3,y3,z3,x4,y4,z4,sx,sy,sz,isrc, &
+              CALL Quad_BEMIntNumAna(x1,y1,z1,x2,y2,z2,x3,y3,z3,x4,y4,z4,sx,sy,sz,isrc, &
                             subdomain(isd)%normMul(jj),integ,inteh)
+
+              !CALL Quad_BEMInt(x1,y1,z1,x2,y2,z2,x3,y3,z3,x4,y4,z4,sx,sy,sz,isrc, &
+              !              subdomain(isd)%normMul(jj),integ,inteh)
 
             ELSE
               CALL WriteToLog("Error :: Element type not supported!")
@@ -540,6 +549,7 @@ SUBROUTINE SetUpSubdomains()
           END IF
         END DO ! nbelem in wall
       END DO ! walls in subdomain
+
 !
 !     Find c parameter : u=1, q=(0,0,0)*(nx,ny,nz)=0
 !
@@ -592,7 +602,7 @@ SUBROUTINE SetUpSubdomains()
 
       REAL(rk) sx,sy,sz
       REAL(rk) x1,y1,z1,x2,y2,z2,x3,y3,z3,x4,y4,z4,c
-      REAL(rk) integ,err,shpf
+      REAL(rk) integ,err,shpf,xxx
 
       REAL(rk) rowH(nnodes),rowG(nqnodes)
       REAL(rk), ALLOCATABLE :: inteH(:)
@@ -652,16 +662,23 @@ SUBROUTINE SetUpSubdomains()
             z3=node(element(ie)%con(3))%x(3)  !p%x(p%ibc(ie,3),3)
 
             IF (element(ie)%type.EQ.2) THEN ! 3 node trangle
-!
+
+!             NUMERIC EVAL OF SINGULAR INTEGRALS
 !             Set recursion depth for singular triangles
 !
-              IntRecDepth=parTriRecur
-
-              CALL Triangle_BEMInt(x1,y1,z1,x2,y2,z2,x3,y3,z3,sx,sy,sz, &
+              !IntRecDepth=parTriRecur
+              !CALL Triangle_BEMInt(x1,y1,z1,x2,y2,z2,x3,y3,z3,sx,sy,sz, &
+              !                subdomain(isd)%normMul(jj)*element(ie)%normal(1), &
+              !                subdomain(isd)%normMul(jj)*element(ie)%normal(2), &
+              !                subdomain(isd)%normMul(jj)*element(ie)%normal(3), &
+              !                element(ie)%area,integ,inteH(1),inteH(2),inteH(3),isrc,IntRecDepth)
+!                
+!             ANALYTIC EVAL OF SINGULAR INTEGRALS
+              CALL Triangle_BEMIntAnal(x1,y1,z1,x2,y2,z2,x3,y3,z3,sx,sy,sz, &
                               subdomain(isd)%normMul(jj)*element(ie)%normal(1), &
                               subdomain(isd)%normMul(jj)*element(ie)%normal(2), &
                               subdomain(isd)%normMul(jj)*element(ie)%normal(3), &
-                              element(ie)%area,integ,inteH(1),inteH(2),inteH(3),isrc,IntRecDepth)
+                              element(ie)%area,integ,inteH(1),inteH(2),inteH(3),isrc)
 
             ELSE IF (element(ie)%type.EQ.3) THEN ! 4 node quad
 
@@ -669,8 +686,12 @@ SUBROUTINE SetUpSubdomains()
               y4=node(element(ie)%con(4))%x(2)
               z4=node(element(ie)%con(4))%x(3)
 
-              CALL Quad_BEMInt(x1,y1,z1,x2,y2,z2,x3,y3,z3,x4,y4,z4,sx,sy,sz,isrc, &
-                            subdomain(isd)%normMul(jj),integ,inteh)
+              !CALL Quad_BEMInt(x1,y1,z1,x2,y2,z2,x3,y3,z3,x4,y4,z4,sx,sy,sz,isrc, &
+              !              subdomain(isd)%normMul(jj),integ,inteh)
+
+              CALL Quad_BEMIntNumAna(x1,y1,z1,x2,y2,z2,x3,y3,z3,x4,y4,z4,sx,sy,sz,isrc, &
+                            subdomain(isd)%normMul(jj),integ,inteh)                                                   
+
             ELSE
               CALL WriteToLog("Error :: Element type not supported!")
             END IF
@@ -715,7 +736,39 @@ SUBROUTINE SetUpSubdomains()
 
 
 
+!
+!     ******************************************************************
+!
+  SUBROUTINE Triangle_BEMIntAnal(x1,y1,z1,x2,y2,z2,x3,y3,z3,sx,sy,sz, &
+                                nx,ny,nz,area,integ,integ1,integ2,integ3,isrc)
+!
+!
+!     ******************************************************************
+    USE Triangle ! provides tipw
+    USE mCommon
+    IMPLICIT NONE
 
+    REAL(rk) sx,sy,sz ! source point
+    REAL(rk) nx,ny,nz ! unit normal on triangle surface
+    REAL(rk) x1,y1,z1,x2,y2,z2,x3,y3,z3 ! triangle vertexes
+    REAL(rk) integ,area,integ1,integ2,integ3
+    INTEGER isrc
+
+    IF (isrc.EQ.0) THEN
+!
+!     non-singular integrals 
+!
+      CALL Triangle_3DLapInt(x1,y1,z1,x2,y2,z2,x3,y3,z3,sx,sy,sz, &
+                              nx,ny,nz,area,integ,integ1,integ2,integ3)
+    ELSE
+!
+!     singular integrals
+!
+      CALL Triangle_3DsingLapInt(x1,y1,z1,x2,y2,z2,x3,y3,z3,area,integ,integ1,integ2,integ3,isrc)      
+    END IF
+
+  END
+!
 
 !
 !     ******************************************************************

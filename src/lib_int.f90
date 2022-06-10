@@ -402,6 +402,11 @@
 !
 !     glavna integracijska zanka
 !
+
+      ndivXi = 1
+      ndivEt = 1
+      !print *,ng1s,ng2s
+
       DO idivXi=1,ndivXi
         DO idivEt=1,ndivEt
           a=-1.0_rk+(idivXi-1)*2.0_rk/ndivXi
@@ -598,8 +603,8 @@
 !
 !
 ! -----------------------------------------------------------------------------------------
-!
       SUBROUTINE CalElementArea(e)
+!
 
       USE mMesh
       USE mPar

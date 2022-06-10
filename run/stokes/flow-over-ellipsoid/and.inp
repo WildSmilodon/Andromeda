@@ -47,6 +47,8 @@ TINW Yes
 #LISS -i bicgstab -p jacobi -tol 1.0e-8 -maxiter 1000 -print all
 LISS -i bicgstab -p jacobi -tol 1.0e-8 -maxiter 1000
 
+# SLE type (lis, lisfull, crs, full)
+SLET lis
 
 # Transform mesh to superellipsoid
 #SUEL 2.0 1.0 1.0 1.0 1.0

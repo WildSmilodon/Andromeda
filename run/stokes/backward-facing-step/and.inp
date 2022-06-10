@@ -6,24 +6,23 @@
 MDIR ./
 
 # Mesh file
-LGEO ../../mesh/cyl-01.msh
+LGEO ../../mesh/kvader-2-6-30-6k.msh
 
 # BiC file
-LBIC stokesPipe-X.bic
-
+LBIC stokesBFS-X.bic
 
 # Problem type
 PRTY Stokes
 
 # LIS solver settings
-LISS -i bicg -p none -tol 1.0e-8 -maxiter 1000
+LISS -i bicgstab -p jacobi -tol 1.0e-8 -maxiter 1000
 
 # SLE type
 SLET LIS
 
 
 # Triangle integration (1,3,5),No.recursion
-ITRI 5 20 
+ITRI 5 20
 # Qudarilateral integration (reg: 1..8), (sing:1..8)
 IQUD 4 4
 
@@ -35,13 +34,13 @@ OINI Yes
 OMSH Yes
 
 # Screen output
-SCRO No
+SCRO No 
 
 # Write integrals to disk
-WINT No
+WINT Yes 
 
 
 # Domain profile
-DPLE 2
-zProf 0.5 0.5 0.0 0.5 0.5 1.0 101
-xProf 0.0 0.5 0.5 1.0 0.5 0.5 101
+#DPLE 2
+#zProf 0.5 0.5 0.0 0.5 0.5 1.0 101
+#xProf 0.0 0.5 0.5 1.0 0.5 0.5 101

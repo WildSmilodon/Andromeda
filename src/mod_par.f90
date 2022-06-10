@@ -84,6 +84,7 @@
       CHARACTER(255), POINTER :: parKeyDesc(:)
 
       INTEGER parQ,parU
+      INTEGER parSLEtype,parLIS,parLISfull,parCRS,parFULL
 
       PARAMETER (parInputFileName="and.inp")
       PARAMETER (parResultsFileName="and.results.vtu")
@@ -103,6 +104,13 @@
       PARAMETER (parLaplace = 1973)
       PARAMETER (parU = 26)
       PARAMETER (parQ = 73)
+
+      PARAMETER (parLIS  = 1)
+      PARAMETER (parLISfull = 2)
+      PARAMETER (parCRS  = 3)
+      PARAMETER (parFULL = 4)
+
+
 
 !     Post-processing (values along the line projected onto surface)
       INTEGER parOutProfile
@@ -129,7 +137,7 @@ subroutine defineKeys()
 !
 !     Keywords
 !
-  parNOkeys=29
+  parNOkeys=30
   allocate (parKey(parNOkeys))
   allocate (parKeyDesc(parNOkeys))
   parKey(1)="MDIR"
@@ -140,7 +148,7 @@ subroutine defineKeys()
   parKeyDesc(3)="parBiCFileName - name of the boundary and initial conditions file (*.bic)."
   parKey(4)="ITRI"
   parKeyDesc(4)="parTriInteg, parTriRecur - triangle integration (1,3,5), no. of recursions."
-  parKey(5)="IQUA"
+  parKey(5)="IQUD"
   parKeyDesc(5)="parQuadIntegRegu,parQuadIntegSing - qudarilateral integration (reg: 1..8), (sing:1..8)."
   parKey(6)="MTRO"
   parKeyDesc(6)="parMTrot(1),parMTrot(2),parMTrot(3) - mesh rotation"
@@ -190,6 +198,9 @@ subroutine defineKeys()
   parKeyDesc(28)="flowType x y z e0 e1 e2 e3 - flow over rotated particle"   
   parKey(29)="LISS"
   parKeyDesc(29)="LIS library solver settings, i.e. -i bicg -p none -tol 1.0e-8 -maxiter 1000"   
+  parKey(30)="SLET"
+  parKeyDesc(30)="SLE type, choose: LIS, LISfull, CRS, FULL "   
+
 
 end subroutine
 
@@ -252,6 +263,7 @@ end subroutine
       parOutDomainProfile = parNo
 
       parPrType = parLaplace
+      parSLEtype = parCRS
 
       parQinw = parYes
       parUinw = parYes
@@ -355,7 +367,7 @@ end subroutine
           READ(OneLine,*) dummy,dummy
           parConserveMemory=Cstring(dummy,"YES")
 
-        ELSE IF (KeyWord.EQ.parKey(21)) THEN ! COME
+        ELSE IF (KeyWord.EQ.parKey(21)) THEN ! PRTY
           READ(OneLine,*) dummy,dummy
           if (Cstring(dummy,"STOKES").EQ.parYes) parPrType = parStokes
           if (Cstring(dummy,"LAPLACE").EQ.parYes) parPrType = parLaplace
@@ -394,6 +406,12 @@ end subroutine
           parFlop = parYes  
         ELSE IF (KeyWord.EQ.parKey(29)) THEN ! LISS
           parLISslvSet = OneLine(6:LEN_TRIM(OneLine))
+        ELSE IF (KeyWord.EQ.parKey(30)) THEN ! SLET
+          READ(OneLine,*) dummy,dummy
+          if (Cstring(dummy,"LIS").EQ.parYes) parSLEtype = parLIS
+          if (Cstring(dummy,"LISFULL").EQ.parYes) parSLEtype = parLISfull     
+          if (Cstring(dummy,"CRS").EQ.parYes) parSLEtype = parCRS
+          if (Cstring(dummy,"CRSFULL").EQ.parYes) parSLEtype = parFULL
         END IF
 
         CALL rOneTL(lun,OneLine)

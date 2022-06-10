@@ -1,0 +1,134 @@
+#
+#  Andromeda BiC file
+#
+
+#
+# first enter number of equations and the name of each
+#
+EQUATIONS 3
+X
+Y
+Z
+
+#
+# Define subdomains (sdName, diff,  followed by list of walls)
+#
+SUBDOMAINS 1
+sdFluid 1.0 inlet outlet step front back bottom top
+
+#
+# boundary conditions
+#
+# BOUNDARY eq.name function/flux const/lin/qud
+
+
+
+#
+# INLET (known velocity)
+#
+BOUNDARY X inlet function quad
+0.0 0.0 0.0 2.6666666666 0.0 0.0 0.0 0.0 0.0 -2.6666666666
+#1.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+BOUNDARY Y inlet function const
+0.0
+BOUNDARY Z inlet function const
+0.0
+
+#
+# OUTLET (known pressure (normal = x direction), tangential direction velocity = 0 )
+#
+BOUNDARY X outlet flux const
+-7.0
+BOUNDARY Y outlet function const
+0.0
+BOUNDARY Z outlet function const
+0.0
+
+
+# 
+# WALLS (no-slip)
+#
+BOUNDARY X top function const
+0.0
+BOUNDARY X bottom function const
+0.0
+BOUNDARY X step function const
+0.0
+BOUNDARY Y top function const
+0.0
+BOUNDARY Y bottom function const
+0.0
+BOUNDARY Y step function const
+0.0
+BOUNDARY Z top function const
+0.0
+BOUNDARY Z bottom function const
+0.0
+BOUNDARY Z step function const
+0.0
+
+#
+# SYMMETRY (free slip + normal velocity = 0 )
+# 
+BOUNDARY X front flux const
+0.0
+BOUNDARY X back flux const
+0.0
+# 
+BOUNDARY Y front function const
+0.0
+BOUNDARY Y back function const
+0.0
+BOUNDARY Z front function const
+0.0
+BOUNDARY Z back function const
+0.0
+
+
+
+#
+# initial conditions
+#
+# INITIAL eq.name wallName function/flux const/lin/qud
+
+#INITIAL temperatura front function const
+#0.5
+
+
+#
+# CORNER and EDGE nodes
+#
+# EDGE eq.name wall1 wall2 TargetWall
+EDGE sdFluid top back top
+EDGE sdFluid top front top
+EDGE sdFluid top outlet top
+EDGE sdFluid top inlet top
+
+EDGE sdFluid bottom back bottom
+EDGE sdFluid bottom front bottom
+EDGE sdFluid bottom outlet bottom
+EDGE sdFluid bottom step bottom
+
+EDGE sdFluid front inlet front
+EDGE sdFluid front step step
+EDGE sdFluid front outlet front
+EDGE sdFluid back inlet back
+EDGE sdFluid back step step
+EDGE sdFluid back outlet back
+
+
+CORNER sdFluid top front inlet top
+CORNER sdFluid top front outlet top
+CORNER sdFluid top back inlet top
+CORNER sdFluid top back outlet top
+
+CORNER sdFluid bottom front outlet bottom
+CORNER sdFluid bottom front step bottom
+CORNER sdFluid bottom back step bottom
+CORNER sdFluid bottom back outlet bottom
+
+
+#
+# SOLVER definition
+#
+SOLVER X 1 2 2 5000 5 1.0E-10

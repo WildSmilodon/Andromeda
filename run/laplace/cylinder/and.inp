@@ -12,7 +12,7 @@ LGEO ../../mesh/cyl-01.msh
 LBIC cyl-1sd-prevod.bic
 
 # Triangle integration (1,3,5),No.recursion
-ITRI 5 20
+ITRI 5 1
 # Qudarilateral integration (reg: 1..8), (sing:1..8)
 IQUD 4 4
 

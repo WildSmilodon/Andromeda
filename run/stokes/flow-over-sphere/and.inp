@@ -21,6 +21,13 @@ LBIC particle-in-flow.bic
 # Problem type
 PRTY Stokes
 
+# LIS solver settings
+#LISS -i bicgstab -p jacobi -tol 1.0e-8 -maxiter 1000 -print all
+LISS -i bicgstab -p jacobi -tol 1.0e-8 -maxiter 1000
+
+# SLE type (lis, lisfull, crs, full)
+SLET lis
+
 # Validation run
 SVAL No
 

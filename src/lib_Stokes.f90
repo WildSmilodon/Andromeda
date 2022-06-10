@@ -1554,7 +1554,6 @@ SUBROUTINE sdIntRowQStokes(isd,irow, &
     REAL(rk) prGx,prGy,prGz
     REAL(rk), ALLOCATABLE ::  prTx(:),prTy(:),prTz(:)
 
-
     osemPi = ATAN(1.0)*4.0_rk*8.0_rk
     
 !   Set integrals to zero
@@ -1656,25 +1655,34 @@ SUBROUTINE sdIntRowQStokes(isd,irow, &
   !
   !             Set recursion depth for singular triangles
   !
-                IntRecDepth = parTriRecur
-  
-                CALL Triangle_StokesInt(x1,y1,z1,x2,y2,z2,x3,y3,z3,sx,sy,sz, &
-                    subdomain(isd)%normMul(jj)*element(ie)%normal(1), &
-                    subdomain(isd)%normMul(jj)*element(ie)%normal(2), & 
-                    subdomain(isd)%normMul(jj)*element(ie)%normal(3), &
-                    element(ie)%area,isrc,IntRecDepth, &                           
-                    Gxx,Gxy,Gxz,Gyy,Gyz,Gzz,prGx,prGy,prGz,Txx,Txy,Txz,Tyy,Tyz,Tzz,prTx,prTy,prTz )
-  
+                !IntRecDepth = parTriRecur  
+                !CALL Triangle_StokesInt(x1,y1,z1,x2,y2,z2,x3,y3,z3,sx,sy,sz, &
+                !    subdomain(isd)%normMul(jj)*element(ie)%normal(1), &
+                !    subdomain(isd)%normMul(jj)*element(ie)%normal(2), & 
+                !    subdomain(isd)%normMul(jj)*element(ie)%normal(3), &
+                !    element(ie)%area,isrc,IntRecDepth, &                           
+                !    Gxx,Gxy,Gxz,Gyy,Gyz,Gzz,prGx,prGy,prGz,Txx,Txy,Txz,Tyy,Tyz,Tzz,prTx,prTy,prTz )
+
+                ! Analytical eval of singular integrals
+                CALL Triangle_StokesIntAna(x1,y1,z1,x2,y2,z2,x3,y3,z3,sx,sy,sz, &
+                        subdomain(isd)%normMul(jj)*element(ie)%normal(1), &
+                        subdomain(isd)%normMul(jj)*element(ie)%normal(2), & 
+                        subdomain(isd)%normMul(jj)*element(ie)%normal(3), &
+                        element(ie)%area,isrc, &                           
+                        Gxx,Gxy,Gxz,Gyy,Gyz,Gzz,prGx,prGy,prGz,Txx,Txy,Txz,Tyy,Tyz,Tzz,prTx,prTy,prTz )
+                    
               ELSE IF (element(ie)%type.EQ.3) THEN ! 4 node quad
-  
 
                     x4=node(element(ie)%con(4))%x(1)
                     y4=node(element(ie)%con(4))%x(2)
                     z4=node(element(ie)%con(4))%x(3)
        
-                    CALL Quad_StokesInt(x1,y1,z1,x2,y2,z2,x3,y3,z3,x4,y4,z4,sx,sy,sz,isrc,subdomain(isd)%normMul(jj), &
+                    !CALL Quad_StokesInt(x1,y1,z1,x2,y2,z2,x3,y3,z3,x4,y4,z4,sx,sy,sz,isrc,subdomain(isd)%normMul(jj), &
+                    !           Gxx,Gxy,Gxz,Gyy,Gyz,Gzz,prGx,prGy,prGz,Txx,Txy,Txz,Tyy,Tyz,Tzz,prTx,prTy,prTz )
+                               
+                    CALL Quad_StokesIntNumAna(x1,y1,z1,x2,y2,z2,x3,y3,z3,x4,y4,z4,sx,sy,sz,isrc,subdomain(isd)%normMul(jj), &
                                Gxx,Gxy,Gxz,Gyy,Gyz,Gzz,prGx,prGy,prGz,Txx,Txy,Txz,Tyy,Tyz,Tzz,prTx,prTy,prTz )
- 
+
               ELSE
                 CALL WriteToLog("Error :: Element type not supported!")
               END IF
@@ -1718,7 +1726,6 @@ SUBROUTINE sdIntRowQStokes(isd,irow, &
         END DO ! nbelem in wall
     END DO ! walls in subdomain
  
-    
 !
 !   Set integration error
 !        
@@ -1888,7 +1895,6 @@ subroutine sdIntRowUStokes(isd,irow, &
     REAL(rk) prGx,prGy,prGz
     REAL(rk), ALLOCATABLE ::  prTx(:),prTy(:),prTz(:)
 
-
     osemPi = ATAN(1.0)*4.0_rk*8.0_rk
 
 !   Set integrals to zero
@@ -1981,15 +1987,23 @@ subroutine sdIntRowUStokes(isd,irow, &
                 IF (element(ie)%type.EQ.2) THEN ! 3 node trangle
 !
 !                   Set recursion depth for singular triangles
-!
-                    IntRecDepth=parTriRecur
+!                                  
+                    !IntRecDepth=parTriRecur
+                    !CALL Triangle_StokesInt(x1,y1,z1,x2,y2,z2,x3,y3,z3,sx,sy,sz, &
+                    !        subdomain(isd)%normMul(jj)*element(ie)%normal(1), &
+                    !        subdomain(isd)%normMul(jj)*element(ie)%normal(2), & 
+                    !        subdomain(isd)%normMul(jj)*element(ie)%normal(3), &
+                    !        element(ie)%area,isrc,IntRecDepth, &                           
+                    !        Gxx,Gxy,Gxz,Gyy,Gyz,Gzz,prGx,prGy,prGz,Txx,Txy,Txz,Tyy,Tyz,Tzz,prTx,prTy,prTz )              
+  
 
-                    CALL Triangle_StokesInt(x1,y1,z1,x2,y2,z2,x3,y3,z3,sx,sy,sz, &
+                    CALL Triangle_StokesIntAna(x1,y1,z1,x2,y2,z2,x3,y3,z3,sx,sy,sz, &
                             subdomain(isd)%normMul(jj)*element(ie)%normal(1), &
                             subdomain(isd)%normMul(jj)*element(ie)%normal(2), & 
                             subdomain(isd)%normMul(jj)*element(ie)%normal(3), &
-                            element(ie)%area,isrc,IntRecDepth, &                           
+                            element(ie)%area,isrc, &                           
                             Gxx,Gxy,Gxz,Gyy,Gyz,Gzz,prGx,prGy,prGz,Txx,Txy,Txz,Tyy,Tyz,Tzz,prTx,prTy,prTz )
+       
 
                ELSE IF (element(ie)%type.EQ.3) THEN ! 4 node quad
      
@@ -1997,9 +2011,12 @@ subroutine sdIntRowUStokes(isd,irow, &
                   y4=node(element(ie)%con(4))%x(2)
                   z4=node(element(ie)%con(4))%x(3)
      
-                  CALL Quad_StokesInt(x1,y1,z1,x2,y2,z2,x3,y3,z3,x4,y4,z4,sx,sy,sz,isrc,subdomain(isd)%normMul(jj), &
-                             Gxx,Gxy,Gxz,Gyy,Gyz,Gzz,prGx,prGy,prGz,Txx,Txy,Txz,Tyy,Tyz,Tzz,prTx,prTy,prTz )
+                  !CALL Quad_StokesInt(x1,y1,z1,x2,y2,z2,x3,y3,z3,x4,y4,z4,sx,sy,sz,isrc,subdomain(isd)%normMul(jj), &
+                  !           Gxx,Gxy,Gxz,Gyy,Gyz,Gzz,prGx,prGy,prGz,Txx,Txy,Txz,Tyy,Tyz,Tzz,prTx,prTy,prTz )
      
+                  CALL Quad_StokesIntNumAna(x1,y1,z1,x2,y2,z2,x3,y3,z3,x4,y4,z4,sx,sy,sz,isrc,subdomain(isd)%normMul(jj), &
+                              Gxx,Gxy,Gxz,Gyy,Gyz,Gzz,prGx,prGy,prGz,Txx,Txy,Txz,Tyy,Tyz,Tzz,prTx,prTy,prTz )
+ 
                 ELSE
                   CALL WriteToLog("Error :: Element type not supported!")
                 END IF
@@ -2035,7 +2052,6 @@ subroutine sdIntRowUStokes(isd,irow, &
             END IF
         END DO ! nbelem in wall
     END DO ! walls in subdomain
-
 
 !
 !   Set integration error
@@ -3447,8 +3463,8 @@ SUBROUTINE Quad_StokesInt(x1,y1,z1,x2,y2,z2,x3,y3,z3,x4,y4,z4,xp,yp,zp,isrc,mult
     !
     !     glavna integracijska zanka
     !
-    ndivXi=3
-    ndivEt=3
+    ndivXi=1
+    ndivEt=1 ! RRRRRRRRRRRRRR
 
     DO idivXi=1,ndivXi
       DO idivEt=1,ndivEt
@@ -3692,4 +3708,196 @@ SUBROUTINE Quad_StokesInt(x1,y1,z1,x2,y2,z2,x3,y3,z3,x4,y4,z4,xp,yp,zp,isrc,mult
   
   END
   
+
+!
+! -----------------------------------------------------------------------------
+!
+  SUBROUTINE Quad_StokesIntNum(x1,y1,z1,x2,y2,z2,x3,y3,z3,x4,y4,z4,xp,yp,zp,multi, &
+    Gxx,Gxy,Gxz,Gyy,Gyz,Gzz,prGx,prGy,prGz,Txx,Txy,Txz,Tyy,Tyz,Tzz,prTx,prTy,prTz )
+    !
+    !
+    !     $: Integracija Robni 4 tockovni element s 4 tockovno geometrijo
+    !
+    ! -----------------------------------------------------------------------------
+      USE GaussIntegration
+      USE mPar
+      USE mCommon
+      IMPLICIT NONE
+    
+      INTEGER i,j,k,isip,ng1,ng2
+      !
+      REAL(rk) xp,yp,zp ! source point
+        REAL(rk) x1,y1,z1,x2,y2,z2,x3,y3,z3,x4,y4,z4 ! quad vertexes
+    
+    
+      REAL(rk) xc0,yc0,zc0,xet,yet,zet,xks,yks,zks
+      REAL(rk) ajac
+      REAL(rk) pi2
+      REAL(rk) eti,etj,eta1m,eta2m,eta1p,eta2p
+      REAL(rk) anx,any,anz,anx1,any1,anz1
+    
+      REAL(rk) multi ! flips normals
+    
+      REAL(rk) fig4(4),w
+      REAL(rk) ksi(5),eta(5) ! prve 4 za funkcijo, peta v sredini za fluks SP
+      !
+      !      integral divison
+      REAL(rk) a,b,c,d,dex,gii,gij
+      INTEGER idivXi,ndivXi,idivEt,ndivEt
+    
+      ! Kernels
+      REAL(rk) G(3,3) ! Stokeslet
+      REAL(rk) T(3,3) ! Stresslet times normal
+      REAL(rk) prG(3) ! Pressure 
+      REAL(rk) prT(3) ! Pressure 
+    
+      ! Results
+      REAL(rk) Gxx,Gxy,Gxz,Gyy,Gyz,Gzz
+      REAL(rk) prGx,prGy,prGz
+      REAL(rk) Txx(4),Txy(4),Txz(4),Tyy(4),Tyz(4),Tzz(4)
+      REAL(rk) prTx(4),prTy(4),prTz(4)
+    
+      !
+      DATA ksi / 0.0_rk,  1.0_rk, 1.0_rk, 0.0_rk, 0.5_rk/
+      DATA eta / 0.0_rk,  0.0_rk, 1.0_rk, 1.0_rk, 0.5_rk/
+      !
+      !*** SET NUMBER OF INTEGRATION POINTS
+      !
+      !     regular
+      ng1=gaus%ng1(parQuadIntegRegu)
+      ng2=gaus%ng2(parQuadIntegRegu)
+      !
+      !***  4 NODE CONTINUOUS BOUNDARY ELEMENT
+      !
+      PI2=2.0_rk*PI
+      !
+      ! Set to zero
+      !
+      Gxx = 0.0_rk
+      Gxy = 0.0_rk
+      Gxz = 0.0_rk
+      Gyy = 0.0_rk
+      Gyz = 0.0_rk
+      Gzz = 0.0_rk
+      prGx = 0.0_rk
+      prGy = 0.0_rk
+      prGz = 0.0_rk
+      DO i=1,4
+        Txx(i) = 0.0_rk
+        Txy(i) = 0.0_rk
+        Txz(i) = 0.0_rk
+        Tyy(i) = 0.0_rk
+        Tyz(i) = 0.0_rk
+        Tzz(i) = 0.0_rk
+        prTx(i) = 0.0_rk
+        prTy(i) = 0.0_rk
+        prTz(i) = 0.0_rk
+      END DO    
+    
+    
+
+      !
+      !     glavna integracijska zanka
+      !
+      ndivXi=3
+      ndivEt=3
   
+      DO idivXi=1,ndivXi
+        DO idivEt=1,ndivEt
+          a=-1.0_rk+(idivXi-1)*2.0_rk/ndivXi
+          b=-1.0_rk+(idivXi)*2.0_rk/ndivXi
+          c=-1.0_rk+(idivEt-1)*2.0_rk/ndivEt
+          d=-1.0_rk+(idivEt)*2.0_rk/ndivEt
+          dex=0.25_rk*(b-a)*(d-c)
+    
+
+      !
+      !*** REGULAR INTEGRALS
+      !
+        DO i=ng1,ng2
+          gii=a+0.5_rk*(gaus%GI(I)+1.0_rk)*(b-a)
+          ETA1M=1.0_rk-gii
+          ETA1P=1.0_rk+gii
+          DO j=ng1,ng2
+            gij=c+0.5_rk*(gaus%GI(J)+1.0_rk)*(d-c)
+            ETA2M=1.0_rk-gij
+            ETA2P=1.0_rk+gij
+      !
+            FIG4(1)=0.25_rk*ETA1M*ETA2M
+            FIG4(2)=0.25_rk*ETA1P*ETA2M
+            FIG4(3)=0.25_rk*ETA1P*ETA2P
+            FIG4(4)=0.25_rk*ETA1M*ETA2P
+    
+            XC0=FIG4(1)*X1+FIG4(2)*X2+FIG4(3)*X3+FIG4(4)*X4
+            YC0=FIG4(1)*Y1+FIG4(2)*Y2+FIG4(3)*Y3+FIG4(4)*Y4
+            ZC0=FIG4(1)*Z1+FIG4(2)*Z2+FIG4(3)*Z3+FIG4(4)*Z4
+    
+            XKS=0.25_rk*(-ETA2M*X1+ETA2M*X2+ETA2P*X3-ETA2P*X4)
+            YKS=0.25_rk*(-ETA2M*Y1+ETA2M*Y2+ETA2P*Y3-ETA2P*Y4)
+            ZKS=0.25_rk*(-ETA2M*Z1+ETA2M*Z2+ETA2P*Z3-ETA2P*Z4)
+    
+            XET=0.25_rk*(-ETA1M*X1-ETA1P*X2+ETA1P*X3+ETA1M*X4)
+            YET=0.25_rk*(-ETA1M*Y1-ETA1P*Y2+ETA1P*Y3+ETA1M*Y4)
+            ZET=0.25_rk*(-ETA1M*Z1-ETA1P*Z2+ETA1P*Z3+ETA1M*Z4)
+    
+            ANX=YKS*ZET-YET*ZKS
+            ANY=XET*ZKS-XKS*ZET
+            ANZ=XKS*YET-XET*YKS
+    
+            AJAC=1.0_rk/SQRT(ANX**2+ANY**2+ANZ**2)
+    
+            ANX1=multi*ANX*AJAC
+            ANY1=multi*ANY*AJAC
+            ANZ1=multi*ANZ*AJAC
+    
+            AJAC=dex*gaus%OME(I)*gaus%OME(J)/AJAC
+    
+                !
+                ! Calculate Stokes kernel
+                !
+            CALL StokesKernel(XP,YP,ZP,XC0,YC0,ZC0,ANX1,ANY1,ANZ1,G,T,prG,prT)
+            !
+            !       Sum up integral
+            !
+            w = AJAC
+    
+            Gxx = Gxx + w * G(1,1)  ! constant interpolation of flux
+            Gxy = Gxy + w * G(1,2)  ! constant interpolation of flux
+            Gxz = Gxz + w * G(1,3)  ! constant interpolation of flux
+    
+            Gyy = Gyy + w * G(2,2)  ! constant interpolation of flux
+            Gyz = Gyz + w * G(2,3)  ! constant interpolation of flux
+    
+            Gzz = Gzz + w * G(3,3)  ! constant interpolation of flux
+    
+            prGx = prGx + w * prG(1)  ! constant interpolation of flux               
+            prGy = prGy + w * prG(2)  ! constant interpolation of flux               
+            prGz = prGz + w * prG(3)  ! constant interpolation of flux               
+    
+            DO isip=1,4
+              w = AJAC * FIG4(isip)
+    
+              Txx(isip) = Txx(isip) + w * T(1,1)   ! linear interpolation of function
+              Txy(isip) = Txy(isip) + w * T(1,2)   ! linear interpolation of function
+              Txz(isip) = Txz(isip) + w * T(1,3)   ! linear interpolation of function
+    
+              Tyy(isip) = Tyy(isip) + w * T(2,2)   ! linear interpolation of function
+              Tyz(isip) = Tyz(isip) + w * T(2,3)   ! linear interpolation of function
+              Tzz(isip) = Tzz(isip) + w * T(3,3)   ! linear interpolation of function
+    
+              prTx(isip) = prTx(isip) + w * prT(1)   ! linear interpolation of function
+              prTy(isip) = prTy(isip) + w * prT(2)   ! linear interpolation of function
+              prTz(isip) = prTz(isip) + w * prT(3)   ! linear interpolation of function
+            END DO
+    
+          END DO
+        END DO
+      CONTINUE
+
+    
+      END DO
+    END DO
+    
+    END
+    
+    

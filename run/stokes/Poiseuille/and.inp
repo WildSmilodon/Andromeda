@@ -19,6 +19,13 @@ LBIC stokesPoiseuille-X.bic
 # Problem type
 PRTY Stokes
 
+# LIS solver settings
+LISS -i bicgstab -p jacobi -tol 1.0e-8 -maxiter 1000
+
+# SLE type
+SLET LIS
+
+
 # Triangle integration (1,3,5),No.recursion
 ITRI 5 20
 # Qudarilateral integration (reg: 1..8), (sing:1..8)

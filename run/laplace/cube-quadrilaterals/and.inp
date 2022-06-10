@@ -17,7 +17,7 @@ ITRI 5 20
 IQUD 4 4
 
 # Output results for stochastic postprocessing (and.stochastic.txt)
-OSTO Yes
+OSTO No 
 # Output initial distribution of function and flux (and.initial.vtu)
 OINI Yes
 # Output results in Paraview format (and.results.vtu)
