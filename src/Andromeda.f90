@@ -19,8 +19,8 @@ program Andromeda
 !     Name and version of the code
 !
       parIDname='Andromeda'
-      parIDversion='1.6'
-      parIDdate='June 2022'
+      parIDversion='1.7' 
+      parIDdate='November 2024'
 !
 !     Init parallel environment
 !      

@@ -1,0 +1,90 @@
+#
+#  Andromeda BiC file
+#
+
+#
+# first enter number of equations and the name of each
+#
+EQUATIONS 3
+X
+Y
+Z
+
+#
+# Define subdomains (sdName, diff,  followed by list of walls)
+#
+SUBDOMAINS 1
+sdFluid 1.0 spredaj stena zadaj particle
+
+
+#
+# boundary conditions
+#
+# BOUNDARY eq.name function/flux const/lin/qud
+
+
+
+#
+# INLET (known velocity)
+#
+BOUNDARY X spredaj function const
+0.0
+BOUNDARY Y spredaj function const
+0.0
+BOUNDARY Z spredaj function quad
+2.0 0.0 0.0 0.0 0.0 0.0 0.0 -8.0 -8.0 0.0
+
+#
+# OUTLET (known pressure (normal = z direction), tangential direction velocity = 0 )
+#
+BOUNDARY X zadaj function const
+0.0
+BOUNDARY Y zadaj function const
+0.0
+BOUNDARY Z zadaj flux const
+0.0
+
+
+# 
+# WALLS (no-slip)
+#
+BOUNDARY X stena function const
+0.0
+BOUNDARY Y stena function const
+0.0
+BOUNDARY Z stena function const
+0.0
+
+# 
+# PARTICLE (no-slip)
+#
+BOUNDARY X particle function const
+0.0
+BOUNDARY Y particle function const
+0.0
+BOUNDARY Z particle function const
+0.0
+
+#
+#
+# initial conditions
+#
+# INITIAL eq.name wallName function/flux const/lin/qud
+
+#INITIAL temperatura front function const
+#0.5
+
+
+#
+# CORNER and EDGE nodes
+#
+# EDGE eq.name wall1 wall2 TargetWall
+EDGE sdFluid spredaj stena stena
+EDGE sdFluid zadaj stena stena
+
+
+
+#
+# SOLVER definition
+#
+SOLVER X 1 2 2 500 5 1.0E-8

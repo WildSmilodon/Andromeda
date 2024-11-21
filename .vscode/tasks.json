@@ -1,0 +1,60 @@
+{
+      // See https://go.microsoft.com/fwlink/?LinkId=733558
+      // for the documentation about the tasks.json format
+      "version": "2.0.0",
+      "tasks": [
+          {
+              "label": "build",
+              "type": "shell",
+              "command": "cd build && make",
+              "problemMatcher": [
+                  "$gcc"
+              ],
+              "group": {
+                  "kind": "build",
+                  "isDefault": true
+              }
+          },
+          {
+              "label": "clean & build",
+              "type": "shell",
+              "command": "cd build && make clean && make",
+              "problemMatcher": [
+                  "$gcc"
+              ]
+          },
+          {
+              "label": "run L-cube",
+              "type": "shell",
+              "command": "cd run/laplace/cube && ../../../bin/Andromeda",
+              "problemMatcher": [
+                  "$gcc"
+              ]
+          },  
+          {
+            "label": "run S-flow-all-sides",
+            "type": "shell",
+            "command": "cd run/stokes/flow-over-sphere-from-all-sides && ../../../bin/Andromeda",
+            "problemMatcher": [
+                "$gcc"
+            ]
+          },
+          {
+            "label": "run S-Couette",
+            "type": "shell",
+            "command": "cd run/stokes/Couette && ../../../bin/Andromeda",
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+          "label": "mpirun S-Couette",
+          "type": "shell",
+          "command": "cd run/stokes/Couette && mpirun -np 3 ../../../bin/Andromeda",
+          "problemMatcher": [
+              "$gcc"
+          ]
+      }
+
+      ]
+  }

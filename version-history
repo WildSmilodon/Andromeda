@@ -46,3 +46,5 @@
 
   - 1.6   :  implement parallel solver, lis library
              resolved bug in pressure solution when using tri meshes
+
+  - 1.7   :  Makefile update, build folder

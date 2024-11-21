@@ -9,7 +9,7 @@ SUBROUTINE StokesInlet3sidesTorquePiCRS()
   USE mEqns
   USE mPar
   USE mCommon
-  IMPLICIT NONE
+  IMPLICIT NONE   
 
   INTEGER nits,ierr,isd
   REAL(rk)    cput
@@ -1830,6 +1830,47 @@ end subroutine
   
   end subroutine
 
+!
+!     ------------------------------------------------------------------
+!
+  SUBROUTINE getDyadIntegrateFluxes(wallID,D)
+
+    USE mEqns
+    USE mPar
+    use mMesh
+    IMPLICIT NONE
+    integer wallID,i,j,row,col
+    real(rk) D(3,3),r(3),q(3)
+  
+    D = 0.0_rk
+
+    DO i=1,nelem
+      IF (element(i)%bcid.EQ.wallID) THEN
+        !
+        !  Set up traction vector
+        !
+        DO j=1,3
+          q(j) = eqn(j)%q(i)
+        END DO
+        !
+        ! Radij vector to mesh element
+        !
+        CALL getElementCenter(i,r)
+        !
+        ! Add to integral (constant interpolation): qr (q dyadic r)
+        !
+        DO row = 1,3
+          DO col = 1,3
+            D(row,col) = D(row,col) + element(i)%area * q(row) * r(col)
+          END DO
+        END DO
+
+      END IF
+    END DO
+     
+  
+  end subroutine
+
 
 
 !
@@ -2161,26 +2202,6 @@ SUBROUTINE OutputForceErrorParaview(iWall,Fnum,Fana,err,Fdrag,Flift)
           END
     
 
-subroutine sphere2superE()
-    use mPar
-    use mMesh
-    implicit none
-    real(rk) selX(3),r
-    integer i
-
-    do i=1,nnodes
-        r = node(i)%x(1)**2 + node(i)%x(2)**2 + node(i)%x(3)**2
-
-        if (r.LT.100.0_rk) then
-            call mapSphereToSuperE(parMTsel(1),parMTsel(2),parMTsel(3),parMTsel(4),parMTsel(5),selX,node(i)%x)
-            node(i)%x = selX
-            !print *,i,parMTsel(1),parMTsel(2),parMTsel(3),parMTsel(4),parMTsel(5)
-        end if
-    end do
-        
-
-end subroutine
-
 
 ! -----------------------------------------------------------------------------------------
 SUBROUTINE mapSphereToSuperE(a,b,c,e1,e2,t,r)
@@ -2208,106 +2229,3 @@ SUBROUTINE mapSphereToSuperE(a,b,c,e1,e2,t,r)
 
 END SUBROUTINE
     
-
-! -----------------------------------------------------------------------------------------
-subroutine projectPoints2superE()
-!
-!     Project mesh points to supere surface
-!
-! -----------------------------------------------------------------------------------------  
-  use mPar
-  use mMesh
-  implicit none
-  real(rk) r
-  integer i,k,maxk
-  
-  real(rk) u0,u,res,np(3)
-  real(rk) a,b,c,e1,e2,f,df
-  
-  !PRINT *, "Entering Subroutine :: projectPoints2superE"
-  
-  DO i=1,nnodes
-    r = node(i)%x(1)**2 + node(i)%x(2)**2 + node(i)%x(3)**2
-    IF (r.LT.10.0_rk) THEN
-  
-        np(1) = node(i)%x(1)
-        np(2) = node(i)%x(2)
-        np(3) = node(i)%x(3)
-  
-        CALL NormVector(np)
-  
-        a = parMTsel(1)
-        b = parMTsel(2)
-        c = parMTsel(3)
-        e1 = parMTsel(4)
-        e2 = parMTsel(5)
-        
-        u0 = 1.0D0
-        res = 1.0D0
-      
-        k = 0
-        maxk = 1000
-        DO WHILE ( res > 1.0e-3 )
-      
-          call calF(a,b,c,e1,e2,u0,np,f)
-          call calDF(a,b,c,e1,e2,u0,np,df)
-          u = u0 - f / df
-          !PRINT *, "u=",u,f(u0,np),df(u0,np)
-      
-          call calF(a,b,c,e1,e2,u,np,f)
-          res = abs( f )
-          u0 = u
-      
-          IF (k > maxk) EXIT
-          k = k+1
-      
-        END DO
-      
-        node(i)%x(1) = u * np(1)
-        node(i)%x(2) = u * np(2)
-        node(i)%x(3) = u * np(3)
-      
-        !PRINT *, "u=",u
-        !PRINT *, "res=",res
-        !PRINT *, "k=",k
-        !PRINT *, "p=",node(i)%x 
-  
-    END IF
-  END DO
-  
-end subroutine
-        
-subroutine calF(a,b,c,e1,e2,t,p,f)
-  USE mPar
-  IMPLICIT NONE
-   
-   real(rk) t,p(3),f
-   real(rk) x,y,z,a,b,c,e1,e2
-  !real(rk) sign_x, sign_y, sign_z
-  !sign_x = SIGN( real(1,rk), x )
-  !sign_y = SIGN( real(1,rk), y )
-  !sign_z = SIGN( real(1,rk), z )
-   x = abs( p(1) )
-   y = abs( p(2) )
-   z = abs( p(3) )
-   f = ( (t*x/a)**(2/e2) + (t*y/b)**(2/e2) )**(e2/e1) + (t*z/c)**(2/e1) - 1
-   !print *, "f+1=",f+1
-   
-   RETURN
- end subroutine
- 
-subroutine  calDF(a,b,c,e1,e2,t,p,df)
- use mPar
- implicit none 
- real(rk) df,t,p(3)
- real(rk) x,y,z,a,b,c,e1,e2
-
-  x = abs( p(1) )
-  y = abs( p(2) )
-  z = abs( p(3) )
-  
-  df = 2 * ( ((t*x/a)**(2/e2) + (t*y/b)**(2/e2))**(e2/e1) + (t*z/c)**(2/e1) )
-  df = df / (e1*t)
-
-  RETURN
-end subroutine   

@@ -507,15 +507,14 @@ SUBROUTINE SetUpSubdomains()
 !
 !             Set recursion depth for singular triangles
 !
-!              IntRecDepth=parTriRecur
-!
-!              CALL Triangle_BEMInt(x1,y1,z1,x2,y2,z2,x3,y3,z3,sx,sy,sz, &
-!                              subdomain(isd)%normMul(jj)*element(ie)%normal(1), &
-!                              subdomain(isd)%normMul(jj)*element(ie)%normal(2), & 
-!                              subdomain(isd)%normMul(jj)*element(ie)%normal(3), &
-!                              element(ie)%area,integ,inteH(1),inteH(2),inteH(3),isrc,IntRecDepth)
-!
-!             ANALYTIC EVAL OF SINGULAR INTEGRALS
+              !IntRecDepth=parTriRecur
+              !CALL Triangle_BEMInt(x1,y1,z1,x2,y2,z2,x3,y3,z3,sx,sy,sz, &
+              !                subdomain(isd)%normMul(jj)*element(ie)%normal(1), &
+              !                subdomain(isd)%normMul(jj)*element(ie)%normal(2), & 
+              !                subdomain(isd)%normMul(jj)*element(ie)%normal(3), &
+              !                element(ie)%area,integ,inteH(1),inteH(2),inteH(3),isrc,IntRecDepth)
+
+!              ANALYTIC EVAL OF SINGULAR INTEGRALS
               CALL Triangle_BEMIntAnal(x1,y1,z1,x2,y2,z2,x3,y3,z3,sx,sy,sz, &
                               subdomain(isd)%normMul(jj)*element(ie)%normal(1), &
                               subdomain(isd)%normMul(jj)*element(ie)%normal(2), &

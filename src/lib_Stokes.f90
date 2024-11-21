@@ -276,15 +276,15 @@ SUBROUTINE StokesFLOPcrs()
   implicit none
 
 
-  integer j,k,nid,isd,particle,outside
+  integer i,j,k,nid,isd,particle,outside
   real(rk) flowVelocity(3)
   real(rk) V,R,mu,v0,L
 
-  REAL(rk), ALLOCATABLE :: Fnum(:),Tbd(:)
-  REAL(rk), ALLOCATABLE :: Fbd(:),Tnum(:)
+  REAL(rk), ALLOCATABLE :: Fnum(:),Tbd(:),Dbd(:,:)
+  REAL(rk), ALLOCATABLE :: Fbd(:),Tnum(:),Dnum(:,:)
 
-  ALLOCATE (Fnum(3),Tnum(3))
-  ALLOCATE (Fbd(3),Tbd(3))
+  ALLOCATE (Fnum(3),Tnum(3),Dnum(3,3))
+  ALLOCATE (Fbd(3),Tbd(3),Dbd(3,3))
 
   Fnum=0.0_rk
   Tnum = 0.0_rk
@@ -299,6 +299,12 @@ SUBROUTINE StokesFLOPcrs()
   !
   particle = 1
   outside = 2
+
+  DO i=1,nofw
+    if (TRIM(wall(i)%name).EQ."particle") particle = wall(i)%id
+    if (TRIM(wall(i)%name).EQ."outside")  outside = wall(i)%id
+  END DO
+
   isd = 1
   call calculateVolumeInsideWall(1,particle,V)
   R=(3.0_rk*V/(4*pi))**(1.0_rk/3.0_rk)
@@ -347,6 +353,21 @@ SUBROUTINE StokesFLOPcrs()
   do j=1,3
     Tbd(j) = Tnum(j) / (pi*R*R*R*mu*v0/L)
   end do  
+
+  !
+  !  Calculate dydd traction * r  numerically
+  !
+  call getDyadIntegrateFluxes(particle,Dnum)
+  !
+  !  Nondimensional force
+  !
+  do i=1,3
+    do j=1,3
+      Dbd(i,j) = Dnum(i,j) / (pi*R*R*R*mu*v0/L)
+    end do  
+  end do
+
+
   !
   !  Write force and torque results to log file
   !
@@ -367,7 +388,25 @@ SUBROUTINE StokesFLOPcrs()
   WRITE (parLogTekst,'(3G18.10)') Tnum
   CALL WriteToLog(parLogTekst)
 
-  deallocate(Fnum,Tbd,Fbd,Tnum)  
+  WRITE (parLogTekst,'(A)') "Dyad"
+  CALL WriteToLog(parLogTekst)    
+  WRITE (parLogTekst,'(3G18.10)') Dnum(1,:)
+  CALL WriteToLog(parLogTekst)
+  WRITE (parLogTekst,'(3G18.10)') Dnum(2,:)
+  CALL WriteToLog(parLogTekst)
+  WRITE (parLogTekst,'(3G18.10)') Dnum(3,:)
+  CALL WriteToLog(parLogTekst)  
+
+  WRITE (parLogTekst,'(A)') "Dyad / (pi*R^3*mu*v0/L)"
+  CALL WriteToLog(parLogTekst)    
+  WRITE (parLogTekst,'(3G18.10)') Dbd(1,:)
+  CALL WriteToLog(parLogTekst)
+  WRITE (parLogTekst,'(3G18.10)') Dbd(2,:)
+  CALL WriteToLog(parLogTekst)
+  WRITE (parLogTekst,'(3G18.10)') Dbd(3,:)
+  CALL WriteToLog(parLogTekst) 
+
+  deallocate(Fnum,Tbd,Fbd,Tnum,Dnum,Dbd)  
 
 end
 
@@ -3318,17 +3357,17 @@ SUBROUTINE GetStokesDomainValue(SourcePoint,ux,uy,uz,qx,qy,qz,rx,ry,rz,p,diff,er
   
   DO i=1,nqnodes
 
-    rx = rx + rowGxx(i) * qx(i)
-    rx = rx + rowGxy(i) * qy(i)
-    rx = rx + rowGxz(i) * qz(i)
+    rx = rx + rowGxx(i) * qx(i) / diff
+    rx = rx + rowGxy(i) * qy(i) / diff
+    rx = rx + rowGxz(i) * qz(i) / diff
 
-    ry = ry + rowGxy(i) * qx(i)
-    ry = ry + rowGyy(i) * qy(i)
-    ry = ry + rowGyz(i) * qz(i)
+    ry = ry + rowGxy(i) * qx(i) / diff
+    ry = ry + rowGyy(i) * qy(i) / diff
+    ry = ry + rowGyz(i) * qz(i) / diff
 
-    rz = rz + rowGxz(i) * qx(i)
-    rz = rz + rowGyz(i) * qy(i)
-    rz = rz + rowGzz(i) * qz(i)    
+    rz = rz + rowGxz(i) * qx(i) / diff
+    rz = rz + rowGyz(i) * qy(i) / diff
+    rz = rz + rowGzz(i) * qz(i) / diff   
 
     p = p - ( rowprGx(i) * qx(i) + rowprGy(i) * qy(i) + rowprGz(i) * qz(i) )
 

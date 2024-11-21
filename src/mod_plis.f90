@@ -29,6 +29,25 @@ module plis
    contains 
 
 
+
+
+   ! ----------------------------------------------------------------------------      
+    subroutine plis_print_system_matrix(sle)
+
+      TYPE(systemLinEq) sle 
+      integer i,j
+
+      DO i=0,sle%n
+         DO j=sle%sm_rowS(i),sle%sm_rowS(i+1)-1
+           print *,i+1,sle%sm_colI(j)+1,sle%sm_val(j)
+         END DO
+      END DO
+
+   end subroutine
+
+
+
+
    ! ----------------------------------------------------------------------------      
    subroutine plis_assemble_system_matrix(sle)
 

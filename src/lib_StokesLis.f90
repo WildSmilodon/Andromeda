@@ -360,6 +360,10 @@ SUBROUTINE stokesFormLISsysMrhsMcsrDiv()
   WRITE (parLogTekst,'(A,F10.4)') "TIMER :: stokesFormLISsysMrhsMcsrDiv [s] = ",te-ts
   CALL WriteToLog(parLogTekst)
 
+
+  ! bris
+  !call plis_print_system_matrix(stk%sle)
+  !stop
 END subroutine
 
 

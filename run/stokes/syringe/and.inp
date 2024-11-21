@@ -1,0 +1,50 @@
+#
+# Andromeda input file
+#
+
+# Mesh & BiC file folder
+MDIR ./
+
+# Mesh file
+LGEO ../../mesh/syringe.msh
+
+# BiC file
+LBIC stokesPipePar-X.bic
+
+
+# Problem type
+PRTY Stokes
+
+# LIS solver settings
+LISS -i bicg -p none -tol 1.0e-8 -maxiter 1000
+
+# SLE type
+SLET LIS
+
+
+# Triangle integration (1,3,5),No.recursion
+ITRI 5 20 
+# Qudarilateral integration (reg: 1..8), (sing:1..8)
+IQUD 4 4
+
+# Output results for stochastic postprocessing (and.stochastic.txt)
+OSTO No
+# Output initial distribution of function and flux (and.initial.vtu)
+OINI Yes
+# Output results in Paraview format (and.results.vtu)
+OMSH Yes
+
+# Screen output
+SCRO Yes 
+
+# Write integrals to disk
+WINT No
+
+
+# Domain profile
+DPLE 5
+zProfC  0.0   0.0  0.0  0.0  0.0 5.26 301
+zProfR  0.03  0.0  0.0  0.03 0.0 5.26 301
+zProfL -0.03  0.0  0.0 -0.03 0.0 5.26 301
+zProfU  0.0   0.03 0.0  0.0  0.03 5.26 301
+zProfD  0.0  -0.03 0.0  0.0 -0.03 5.26 301

@@ -36,7 +36,7 @@ module parallel
  
    ! ----------------------------------------------------------------------------
    subroutine par_finalize()  
-      call lis_finalize(env%ierr)
+      !call lis_finalize(env%ierr)
    end subroutine   
 
    

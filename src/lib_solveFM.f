@@ -126,7 +126,7 @@ c
       REAL    cpu
       REAL(rk)  q(neq),a(neq,neq)
 ! Internal
-      REAL    cpu0,cptime
+      REAL(rk)    cpu0,cptime
 c
 c Measure CPU time
 c

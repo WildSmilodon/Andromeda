@@ -16,21 +16,27 @@ doi:10.1016/j.enganabound.2020.11.010
 
 * Štrakl, M., Hriberšek, M., Wedel, J., Steinmann, P., Ravnik, J. (2022). A Model for Translation and Rotation Resistance Tensors for Superellipsoidal Particles in Stokes Flow. J. Mar. Sci. Eng. 2022, 10, 369. doi:10.3390/jmse10030369
 
-### Installation & test:
+### Uses LIS, blas and mpich libraries, compiles under gfortran
 
 ```
 sudo apt-get update
 sudo apt install gfortran make libblas-dev liblapack-dev mpich
+```
+
+Download and install LIS library from: https://www.ssisc.org/lis
+
+LIS library is used with modified header file, see ```./inc/lisf.h```
+
+
+### Installation & test:
+
+```
 git clone https://github.com/WildSmilodon/Andromeda.git
 cd Andromeda/src
 make
 cd ../run
 ./runAll
 ```
-### Uses LIS, blas and mpich libraries
-
-Download and installation of LIS library from: https://www.ssisc.org/lis
-with modified header file, see ```./inc/lisf.h```
 
 
 ### Paraview is used for results postprocessing

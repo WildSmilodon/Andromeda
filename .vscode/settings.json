@@ -1,0 +1,4 @@
+{
+    "fortran.linter.includePaths": ["${workspaceFolder}/inc"],
+    "fortran.linter.modOutput": "${workspaceFolder}/build"
+}
