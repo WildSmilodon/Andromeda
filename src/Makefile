@@ -41,7 +41,9 @@ FIXOBJ = $(patsubst %.f,$(BUILD_DIR)/%.o,$(SFIX))
 F90OBJ = $(patsubst %.f90,$(BUILD_DIR)/%.o,$(SF90))
 
 # Libraries
-LDOPTO = -lblas  /Users/ravnik/Library/lis/lib/liblis.a
+LDOPTO = -lblas -llis
+#LDOPTO = -lblas  /Users/ravnik/Library/lis/lib/liblis.a
+
 
 # Default target
 all: $(BUILD_DIR) program
