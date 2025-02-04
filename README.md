@@ -12,9 +12,11 @@ doi:10.1016/j.enganabound.2020.11.010
 
 * Anna Šušnjara, Ožbej Verhnjak, Dragan Poljak, Mario Cvetković, Jure Ravnik (2022). Uncertainty quantification and sensitivity analysis of transcranial electric stimulation for 9-subdomain human head model. Engineering Analysis with Boundary Elements (2022), Vol 135, Pages 1-11, doi:10.1016/j.enganabound.2021.10.026
 
-* Jure Ravnik, Mitja Štrakl, Jana Wedel, Paul Sterinamnn, Matjaž Hriberšek: Stokes Flow Induced Drag and Torque on Asbestos Particles can not be estimated by a Simplistic Ellipsoidal Approximation, to appear in 2022
+* J. Ravnik, M. Štrakl, J. Wedel, M. Steinmann, M. Hriberšek. (2022). Stokes flow induced drag and torque on asbestos like fibres cannot be estimated by a simplistic ellipsoidal approximation WIT Transactions on Engineering Sciences, vol. 134, pp. 33 - 44; doi:10.2495/BE450031
 
 * Štrakl, M., Hriberšek, M., Wedel, J., Steinmann, P., Ravnik, J. (2022). A Model for Translation and Rotation Resistance Tensors for Superellipsoidal Particles in Stokes Flow. J. Mar. Sci. Eng. 2022, 10, 369. doi:10.3390/jmse10030369
+
+* J. Ravnik (2023). Analytical expressions for singular integrals arising from the 3D Laplace and Stokes kernels when using constant or linear triangular and quadrilateral boundary elements. Engineering Analysis with Boundary Elements, Volume 154, September 2023, Pages 47-53. doi:10.1016/j.enganabound.2023.02.057
 
 ### Uses LIS, blas and mpich libraries, compiles under gfortran
 
@@ -74,3 +76,19 @@ sudo apt-get install gmsh
 ### Getting help
 
 * running Andromeda with ```-h``` command line argument displays help.
+
+### Docker
+
+To make a docker image of Andromeda, using the Dockerfile provided, run
+
+Build
+
+```docker build -t andromeda .```
+
+Run
+
+```docker run -it andromeda```
+
+To have access to a folder from inside docker
+
+```docker run -v $(pwd)/my_files:/workspace/data -it andromeda```

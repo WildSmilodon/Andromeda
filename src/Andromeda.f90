@@ -20,7 +20,7 @@ program Andromeda
 !
       parIDname='Andromeda'
       parIDversion='1.7' 
-      parIDdate='November 2024'
+      parIDdate='February 2025'
 !
 !     Init parallel environment
 !      
@@ -56,7 +56,6 @@ program Andromeda
 !
 !     Write mesh stats to log file
 !
-
       CALL PrintMeshStats()
 !
 !     Read subdomain definitions from BIC file
