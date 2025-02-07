@@ -4,6 +4,11 @@ Solves Laplace diffusion and Stokes flow problems with the Boundary Element Meth
 
 written by Jure Ravnik, http://kepoi.fs.um.si/en/p/jure-ravnik 
 
+### Cite as
+
+Ravnik, J. (2025). Andromeda, a BEM based Stokes flow solver (v1.7). Zenodo. https://doi.org/10.5281/zenodo.14801782
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14801782.svg)](https://doi.org/10.5281/zenodo.14801782)
 
 ### Papers written using this method:
 
