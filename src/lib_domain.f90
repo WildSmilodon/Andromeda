@@ -389,3 +389,69 @@
 
 
       END SUBROUTINE
+
+
+SUBROUTINE calculateDomainValues()
+
+  use mDomainData
+  use mDomainMesh
+  use parallel
+  use mPar
+  implicit none
+  real(rk) :: Point(3),v(3),p
+  real(rk), allocatable :: local_ddE(:,:),global_ddE(:,:)
+  integer :: i,n1,n2,n3,n4,ierr
+
+  ! allocate the domain data arrays and set them to zero
+  call dd_init(DMnnodes,DMnelem)
+  allocate(local_ddE(4,DMnelem))
+  allocate(global_ddE(4,DMnelem))
+  local_ddE = 0.0_rk
+  global_ddE = 0.0_rk
+ 
+  ! loop over elements in the domain mesh
+  do i = 1,DMnelem
+
+  ! Each process handles only elements assigned to its rank
+    if (mod(i, env%nprocs) /= env%myRank) cycle 
+
+    IF (DMelement(i)%type.NE.4) THEN 
+      CALL WriteToLog("Error: Element type not supported! - calculateDomainValues")
+      stop
+    END IF
+
+    ! get the coordinates of the element center
+    n1 = DMelement(i)%con(1)
+    n2 = DMelement(i)%con(2)
+    n3 = DMelement(i)%con(3)
+    n4 = DMelement(i)%con(4)
+
+    Point(1) = (DMnode(n1)%x(1) + DMnode(n2)%x(1) + DMnode(n3)%x(1) + DMnode(n4)%x(1)) / 4.0_rk
+    Point(2) = (DMnode(n1)%x(2) + DMnode(n2)%x(2) + DMnode(n3)%x(2) + DMnode(n4)%x(2)) / 4.0_rk
+    Point(3) = (DMnode(n1)%x(3) + DMnode(n2)%x(3) + DMnode(n3)%x(3) + DMnode(n4)%x(3)) / 4.0_rk
+
+!    print *,i,Point(1),Point(2),Point(3)
+    
+    ! and calculate the velocity and pressure at that point using the GetStokesDV subroutine
+    CALL GetStokesDV(Point,v,p,ierr)
+
+    local_ddE(1,i) = v(1)
+    local_ddE(2,i) = v(2)
+    local_ddE(3,i) = v(3) 
+    local_ddE(4,i) = p
+
+  end do 
+
+  CALL MPI_ALLREDUCE(local_ddE, global_ddE, 4 * DMnelem, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, ierr)
+
+  ! Store the final summed values
+  do i = 1,DMnelem
+    ddE(1)%val(i) = global_ddE(1,i)
+    ddE(2)%val(i) = global_ddE(2,i)
+    ddE(3)%val(i) = global_ddE(3,i)
+    ddE(4)%val(i) = global_ddE(4,i)
+  end do
+
+  deallocate(local_ddE,global_ddE)
+
+END SUBROUTINE      

@@ -19,8 +19,8 @@ program Andromeda
 !     Name and version of the code
 !
       parIDname='Andromeda'
-      parIDversion='1.7' 
-      parIDdate='February 2025'
+      parIDversion='1.8' 
+      parIDdate='April 2025'
 !
 !     Init parallel environment
 !      
@@ -53,6 +53,8 @@ program Andromeda
       CALL CalMeshNormals()
       !CALL VerifyMeshNormals()  ! daj pod IF !!! velja samo za primer delcev
       CALL CalQMesh()
+!     Consider domain mesh if available
+      IF (parDomainExport.EQ.parYes) CALL ReadDomainMesh(parDomainMeshFullName)
 !
 !     Write mesh stats to log file
 !
@@ -117,6 +119,18 @@ program Andromeda
       IF (parQinw.EQ.parYes.AND.amIroot) CALL IntegrateFluxes()
       IF (parUinw.EQ.parYes.AND.amIroot) CALL IntegrateFunction()
       IF (parTinw.EQ.parYes.AND.amIroot) CALL IntegrateTorques()
+!
+!     Calculate domain results
+!            
+      IF (parDomainExport.EQ.parYes) THEN 
+            CALL WriteToLog("Calculate values in the domain ...")
+            call calculateDomainValues()
+            CALL WriteToLog("Write domain results in and.domain.vtu ...")
+            IF (amIroot) CALL OutputDomainMeshParaview()
+            CALL WriteToLog("Write domain results in V ...")
+            IF (amIroot) CALL OutputOpenFOAM() 
+            IF (amIroot) CALL OutputOpenFOAMc()            
+      END IF
 !
 !     Close log files & stop program
 !

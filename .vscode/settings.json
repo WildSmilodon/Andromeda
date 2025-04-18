@@ -1,4 +1,7 @@
 {
     "fortran.linter.includePaths": ["${workspaceFolder}/inc"],
-    "fortran.linter.modOutput": "${workspaceFolder}/build"
+    "fortran.linter.modOutput": "${workspaceFolder}/build",
+    "files.associations": {
+        "and.C": "cpp"
+    }
 }

@@ -1686,11 +1686,7 @@ SUBROUTINE CalFunctionIntegralWalls(u,name)
             IF ( eqn(e)%boundary(w)%known .EQ. iContact ) THEN
               CALL GetBiCValue(eqn(e)%boundary(w),qnode(inode),eqn(e)%q(inode))
             END IF
-
-
-
           END DO
-
 
         END DO ! isd
       END DO ! e
@@ -1977,3 +1973,378 @@ SUBROUTINE CalFunctionIntegralWalls(u,name)
 
 
 
+
+
+! -----------------------------------------------------------------------------
+
+  SUBROUTINE OutputOpenFOAM()
+
+!
+!     $: Outputs data on domain mesh in OpenFOAM format
+!
+! -----------------------------------------------------------------------------
+      USE mDomainMesh
+      USE mMesh
+      USE mDomainData
+      USE mPar
+      USE mEqns
+      IMPLICIT NONE
+
+      INTEGER itp,i,n1,n2,n3,iWall,ne
+      CHARACTER*255 vrstica
+      real(rk) Point(3)
+
+      itp=96
+
+      OPEN (itp,FILE=TRIM(parDomainOpenFOAMResultsFileName),STATUS='UNKNOWN')
+
+!
+!    HEADER
+!      
+      WRITE(itp,'(A)') '/*--------------------------------*- C++ -*----------------------------------*\'
+      WRITE(itp,'(A)') '  =========                 |'
+      WRITE(itp,'(A)') '  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox'
+      WRITE(itp,'(A)') '   \\    /   O peration     | Website:  https://openfoam.org'
+      WRITE(itp,'(A)') '    \\  /    A nd           | Version:  11'
+      WRITE(itp,'(A)') '     \\/     M anipulation  |'
+      WRITE(itp,'(A)') '\*---------------------------------------------------------------------------*/'
+      WRITE(itp,'(A)') 'FoamFile'
+      WRITE(itp,'(A)') '{'
+      WRITE(itp,'(A)') '    format      ascii;'
+      WRITE(itp,'(A)') '    class       volVectorField;'
+      WRITE(itp,'(A)') '    location    "constant";'
+      WRITE(itp,'(A)') '    object      U;'
+      WRITE(itp,'(A)') '}'
+      WRITE(itp,'(A)') '// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //'
+      WRITE(itp,'(A)') ''
+      WRITE(itp,'(A)') 'dimensions      [0 1 -1 0 0 0 0];'
+      WRITE(itp,'(A)') ''
+      WRITE(itp,'(A)') 'internalField   nonuniform List<vector> '
+
+      WRITE(itp,'(I0)') DMnelem
+      WRITE(itp,'(A)') '('
+!
+!     ELEMENT BASED DATA
+!              
+!     Domain Velocity field      
+      DO  i=1,DMnelem
+          WRITE (vrstica,'(A,3G18.9,A)') "(",ddE(1)%val(i),ddE(2)%val(i),ddE(3)%val(i),")"
+          CALL sqblnk(itp,vrstica)
+      END DO
+      WRITE(itp,'(A)') ')'
+      WRITE(itp,'(A)') ';'
+      WRITE(itp,'(A)') ''
+!     Boundary velocity field
+      WRITE(itp,'(A)') 'boundaryField'
+      WRITE(itp,'(A)') '{'
+      DO iWall = 1,nofw
+        WRITE(itp,'(A,A)') '    ',TRIM(wall(iWall)%name)
+        WRITE(itp,'(A)') '    {'
+        WRITE(itp,'(A)') '        type            calculated;'
+        WRITE(itp,'(A)') '        value           nonuniform List<vector> '
+        ne = 0
+        DO i = 1,nelem
+          IF (element(i)%bcid.eq.iWall) THEN
+            ne = ne + 1
+          END IF
+        END DO
+        WRITE(itp,'(I0)') ne
+        WRITE(itp,'(A)') '('
+        
+        do i = 1,nelem
+          if (element(i)%bcid.eq.iWall) then
+            ! get the coordinates of the element center
+            n1 = element(i)%con(1)
+            n2 = element(i)%con(2)
+            n3 = element(i)%con(3)
+
+            Point(1) = (eqn(1)%u(n1) + eqn(1)%u(n2) + eqn(1)%u(n3) ) / 3.0_rk
+            Point(2) = (eqn(2)%u(n1) + eqn(2)%u(n2) + eqn(2)%u(n3) ) / 3.0_rk
+            Point(3) = (eqn(3)%u(n1) + eqn(3)%u(n2) + eqn(3)%u(n3) ) / 3.0_rk
+            WRITE (vrstica,'(A,3G18.9,A)') "(",Point(1),Point(2),Point(3),")"
+            CALL sqblnk(itp,vrstica)
+          end if
+        end do
+
+        WRITE(itp,'(A)') ')'
+        WRITE(itp,'(A)') ';'
+        WRITE(itp,'(A)') '    }'
+      END DO
+      WRITE(itp,'(A)') '}'
+      WRITE(itp,'(A)') ''
+      WRITE(itp,'(A)') ''
+      WRITE(itp,'(A)') '// ************************************************************************* //'
+
+    CLOSE (itp)
+END
+        
+        
+
+
+! -----------------------------------------------------------------------------
+
+SUBROUTINE OutputOpenFOAMc()
+
+  !
+  !     $: Outputs element centers on domain mesh in OpenFOAM format
+  !
+  ! -----------------------------------------------------------------------------
+        USE mDomainMesh
+        USE mMesh
+        USE mDomainData
+        USE mPar
+        IMPLICIT NONE
+  
+        INTEGER itp,i,n1,n2,n3,n4,iWall,ne
+        CHARACTER*255 vrstica
+        real(rk) Point(3)
+  
+        itp=96
+  
+        OPEN (itp,FILE="and.C",STATUS='UNKNOWN')
+  
+  !
+  !    HEADER
+  !      
+        WRITE(itp,'(A)') '/*--------------------------------*- C++ -*----------------------------------*\'
+        WRITE(itp,'(A)') '  =========                 |'
+        WRITE(itp,'(A)') '  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox'
+        WRITE(itp,'(A)') '   \\    /   O peration     | Website:  https://openfoam.org'
+        WRITE(itp,'(A)') '    \\  /    A nd           | Version:  11'
+        WRITE(itp,'(A)') '     \\/     M anipulation  |'
+        WRITE(itp,'(A)') '\*---------------------------------------------------------------------------*/'
+        WRITE(itp,'(A)') 'FoamFile'
+        WRITE(itp,'(A)') '{'
+        WRITE(itp,'(A)') '    format      ascii;'
+        WRITE(itp,'(A)') '    class       volVectorField;'
+        WRITE(itp,'(A)') '    location    "constant";'
+        WRITE(itp,'(A)') '    object      C;'
+        WRITE(itp,'(A)') '}'
+        WRITE(itp,'(A)') '// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //'
+        WRITE(itp,'(A)') ''
+        WRITE(itp,'(A)') 'dimensions      [0 1 0 0 0 0 0];'
+        WRITE(itp,'(A)') ''
+        WRITE(itp,'(A)') 'internalField   nonuniform List<vector> '
+  
+        WRITE(itp,'(I0)') DMnelem
+        WRITE(itp,'(A)') '('
+  !
+  !     ELEMENT BASED DATA
+  !              
+  !     Domain field      
+        DO  i=1,DMnelem
+  
+            n1 = DMelement(i)%con(1)
+            n2 = DMelement(i)%con(2)
+            n3 = DMelement(i)%con(3)
+            n4 = DMelement(i)%con(4)
+          
+            Point(1) = (DMnode(n1)%x(1) + DMnode(n2)%x(1) + DMnode(n3)%x(1) + DMnode(n4)%x(1)) / 4.0_rk
+            Point(2) = (DMnode(n1)%x(2) + DMnode(n2)%x(2) + DMnode(n3)%x(2) + DMnode(n4)%x(2)) / 4.0_rk
+            Point(3) = (DMnode(n1)%x(3) + DMnode(n2)%x(3) + DMnode(n3)%x(3) + DMnode(n4)%x(3)) / 4.0_rk        
+            WRITE (vrstica,'(A,3G18.9,A)') "(",Point(1),Point(2),Point(3),")"
+            CALL sqblnk(itp,vrstica)
+        END DO
+        WRITE(itp,'(A)') ')'
+        WRITE(itp,'(A)') ';'
+        WRITE(itp,'(A)') ''
+  !     Boundary field
+        WRITE(itp,'(A)') 'boundaryField'
+        WRITE(itp,'(A)') '{'
+        DO iWall = 1,nofw
+          WRITE(itp,'(A,A)') '    ',TRIM(wall(iWall)%name)
+          WRITE(itp,'(A)') '    {'
+          WRITE(itp,'(A)') '        type            calculated;'
+          WRITE(itp,'(A)') '        value           nonuniform List<vector> '
+          ne = 0
+          DO i = 1,nelem
+            IF (element(i)%bcid.eq.iWall) THEN
+              ne = ne + 1
+            END IF
+          END DO
+          WRITE(itp,'(I0)') ne
+          WRITE(itp,'(A)') '('
+          
+          do i = 1,nelem
+            if (element(i)%bcid.eq.iWall) then
+              ! get the coordinates of the element center
+              n1 = element(i)%con(1)
+              n2 = element(i)%con(2)
+              n3 = element(i)%con(3)
+              Point(1) = (node(n1)%x(1) + node(n2)%x(1) + node(n3)%x(1) ) / 3.0_rk
+              Point(2) = (node(n1)%x(2) + node(n2)%x(2) + node(n3)%x(2) ) / 3.0_rk
+              Point(3) = (node(n1)%x(3) + node(n2)%x(3) + node(n3)%x(3) ) / 3.0_rk
+              WRITE (vrstica,'(A,3G18.9,A)') "(",Point(1),Point(2),Point(3),")"
+              CALL sqblnk(itp,vrstica)
+            end if
+          end do
+  
+          WRITE(itp,'(A)') ')'
+          WRITE(itp,'(A)') ';'
+          WRITE(itp,'(A)') '    }'
+        END DO
+        WRITE(itp,'(A)') '}'
+        WRITE(itp,'(A)') ''
+        WRITE(itp,'(A)') ''
+        WRITE(itp,'(A)') '// ************************************************************************* //'
+  
+      CLOSE (itp)
+  END
+  
+
+
+! -----------------------------------------------------------------------------
+
+SUBROUTINE OutputDomainMeshParaview()
+
+  !
+  !     $: Outputs data on domain mesh
+  !
+  ! -----------------------------------------------------------------------------
+        USE mDomainMesh
+        USE mDomainData
+        USE mPar
+        IMPLICIT NONE
+  
+        INTEGER itp,i,of,k,j
+        CHARACTER*255 vrstica,tmp
+  
+        itp=96
+  
+        OPEN (itp,FILE=TRIM(parDomainResultsFileName),STATUS='UNKNOWN')
+  
+  
+        WRITE (itp,'(A)') '<?xml version="1.0"?>'
+        WRITE (itp,'(A)')&
+       '<VTKFile type="UnstructuredGrid" version="0.1" byte_order="LittleEndian" compressor="vtkZLibDataCompressor">'
+        WRITE (itp,'(A)') '<UnstructuredGrid>'
+        WRITE (itp,'(A,I10,A,I10,A)') '<Piece NumberOfPoints="',DMnnodes,'" NumberOfCells="',DMnelem,'">'
+  !
+  !     PODATKI V VOZLISCIH
+  !
+        WRITE (itp,"(A)") '<PointData Scalars="node">'
+        WRITE (itp,'(A,A,A)') '<DataArray type="Float32" Name="',trim(ddN(1)%name),'" format="ascii">'
+        DO  i=1,DMnnodes
+          WRITE (itp,*) ddN(1)%val(i)
+        END DO
+        WRITE (itp,'(A)') '</DataArray>'      
+        WRITE (itp,'(A)') '</PointData>'
+  
+  !
+  !     ELEMENT BASED DATA
+  !              
+        WRITE (itp,'(A)') '<CellData Scalars="pressure" Vectors="velocity">'
+  !     Pressure field      
+        WRITE (itp,'(A)') '<DataArray type="Float32"  Name="pressure" format="ascii">'
+        DO  i=1,DMnelem
+            WRITE (vrstica,'(3G18.9)') ddE(4)%val(i)
+            CALL sqblnk(itp,vrstica)
+        END DO
+        WRITE (itp,'(A)') '</DataArray>'
+  !     Velocity field      
+        WRITE (itp,'(A)') '<DataArray type="Float32"  Name="velocity" NumberOfComponents="3" format="ascii">'
+        DO  i=1,DMnelem
+            WRITE (vrstica,'(3G18.9)') ddE(1)%val(i),ddE(2)%val(i),ddE(3)%val(i)
+            CALL sqblnk(itp,vrstica)
+        END DO
+        WRITE (itp,'(A)') '</DataArray>'
+  !      
+        WRITE (itp,'(A)') '</CellData>'
+  
+  !
+  !      KOORDINATE VOZLISC
+  !      
+        WRITE (itp,'(A)') '<Points>'
+        WRITE (itp,'(A)') '<DataArray type="Float32" NumberOfComponents="3" format="ascii">'
+  
+        DO  i=1,DMnnodes
+          WRITE (vrstica,'(3G18.9)') DMnode(i)%x(1),DMnode(i)%x(2),DMnode(i)%x(3)
+          CALL sqblnk(itp,vrstica)
+        END DO
+  
+        WRITE (itp,'(A)') '</DataArray>'
+        WRITE (itp,'(A)') '</Points>'
+  !
+  !     ELEMENTS
+  !                  
+        WRITE (itp,'(A)') '<Cells>'
+  !
+  !     ELEMENT CONNECTIVITY
+  !
+        WRITE (itp,'(A)') '<DataArray type="Int32" Name="connectivity" format="ascii">'
+  
+        DO i=1,DMnelem
+            WRITE(vrstica,*) (DMelement(i)%con(k)-1,k=1,DMelement(i)%nno)
+            CALL sqblnk(itp,vrstica)
+        END DO
+        WRITE (itp,'(A)') '</DataArray>'
+  !
+  !     OFFSETS
+  !                  
+        WRITE (itp,'(A)') '<DataArray type="Int32" Name="offsets" format="ascii">'
+        of = 0
+        DO i=1,DMnelem
+            of = of + DMelement(i)%nno
+            WRITE (itp,*) of
+        END DO
+        WRITE (itp,'(A)') '</DataArray>'
+  !
+  !     ELEMENT TYPES
+  !                  
+        WRITE (itp,'(A)') '<DataArray type="UInt8" Name="types" format="ascii">'
+        DO i=1,DMnelem
+            !IF (element(i)%type.EQ.2) THEN ! three node triangle
+            !  WRITE (itp,*) "5" ! 5 tikotnik, 9 quuad, 12 heksaeder, 10 tetraeder
+            !ELSE IF (element(i)%type.EQ.3) THEN ! four node Quadrangle
+            ! WRITE (itp,*) "9" ! 5 tikotnik, 9 quuad, 12 heksaeder
+            !ELSE 
+          IF (DMelement(i)%type.EQ.4) THEN ! four node tetraeder
+              WRITE (itp,*) "10" ! 5 tikotnik, 9 quuad, 12 heksaeder, 10 tetraeder
+          ELSE
+            CALL WriteToLog("Error :: Element type not supported!")
+          END IF
+        END DO
+        WRITE (itp,'(A)') '</DataArray>'
+  
+      WRITE (itp,'(A)') '</Cells>'
+  
+  
+      WRITE (itp,'(A)') '</Piece>'
+      WRITE (itp,'(A)') '</UnstructuredGrid>'
+      WRITE (itp,'(A)') '</VTKFile>'
+      CLOSE (itp)
+  END
+          
+          
+subroutine exportWallNodeList()
+  use mMesh
+  use mPar
+  implicit none
+
+  integer i, lun,isd,iW,ww,j
+  character(255) vrstica
+
+  lun = 12
+
+  open(lun, file="and.wallNodeList", status='unknown')
+
+  DO isd=1,nosd ! loop over subdomains
+    WRITE(vrstica,*) "Subdomain name: ", subdomain(isd)%name
+    CALL sqblnk(lun,vrstica)
+    DO iW = 1,subdomain(isd)%nofw      
+      ww = subdomain(isd)%loWalls(iW)
+      WRITE(vrstica,*) "Wall name: ", wall(ww)%name
+      CALL sqblnk(lun,vrstica)
+      DO j=1,subdomain(isd)%nnodes        
+        if (subdomain(isd)%BCidList(j).eq.ww) then
+          i = subdomain(isd)%nodeList(j)
+          WRITE(vrstica,*) node(i)%x(1), node(i)%x(2), node(i)%x(3)
+          CALL sqblnk(lun,vrstica)
+        end if
+      END DO
+    END DO                                      
+  END DO
+
+  close(lun)
+
+end subroutine exportWallNodeList

@@ -26,7 +26,7 @@ FLAGS = -J$(BUILD_DIR) # Store .mod files in build directory
 # Source files
 SMODS = mod_common.f90 mod_parallel.f90 mod_par.f90 mod_plis.f90 mod_mesh.f90 \
         mod_trikotnik.f90 mod_gauss.f90 mod_eqns.f90 mod_profile.f90 \
-        mod_linFlowFields.f90 mod_singInt.f90
+        mod_linFlowFields.f90 mod_singInt.f90 mod_domainMesh.f90 mod_domainData.f90
 
 SFIX = lib_lsqr.f lib_solveFM.f
 
@@ -41,8 +41,8 @@ FIXOBJ = $(patsubst %.f,$(BUILD_DIR)/%.o,$(SFIX))
 F90OBJ = $(patsubst %.f90,$(BUILD_DIR)/%.o,$(SF90))
 
 # Libraries
-LDOPTO = -lblas -llis
-#LDOPTO = -lblas  /Users/ravnik/Library/lis/lib/liblis.a
+#LDOPTO = -lblas -llis
+LDOPTO = -lblas  /Users/ravnik/Library/lis/lib/liblis.a
 
 
 # Default target

@@ -1,0 +1,52 @@
+#
+# Andromeda input file
+#
+
+# Mesh & BiC file folder
+MDIR ./
+
+# Mesh file
+#
+# Particle in spherical geometry
+#
+LGEO ../../mesh/sINs-2D.msh
+LDOM ../../mesh/sINs-3D.msh
+
+#
+# boundary condition
+#
+LBIC particle-in-flow.bic
+
+# Problem type
+PRTY Stokes
+
+# LIS solver settings
+#LISS -i bicgstab -p jacobi -tol 1.0e-8 -maxiter 1000 -print all
+LISS -i bicgstab -p jacobi -tol 1.0e-8 -maxiter 1000
+
+# SLE type (lis, lisfull, crs, full)
+SLET lis
+
+# Validation run
+SVAL No
+
+# Triangle integration (1,3,5),No.recursion
+ITRI 5 20
+# Qudarilateral integration (reg: 1..8), (sing:1..8)
+IQUD 4 4
+
+# Output results for stochastic postprocessing (and.stochastic.txt)
+OSTO No
+# Output initial distribution of function and flux (and.initial.vtu)
+OINI Yes
+# Output results in Paraview format (and.results.vtu)
+OMSH Yes
+
+# Screen output
+SCRO No
+
+# Write integrals to disk
+WINT No
+
+# Torque calculation at walls
+TINW Yes

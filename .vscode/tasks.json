@@ -6,7 +6,7 @@
           {
               "label": "build",
               "type": "shell",
-              "command": "cd build && make",
+              "command": "cd src && make",
               "problemMatcher": [
                   "$gcc"
               ],
@@ -18,7 +18,7 @@
           {
               "label": "clean & build",
               "type": "shell",
-              "command": "cd build && make clean && make",
+              "command": "cd src && make clean && make",
               "problemMatcher": [
                   "$gcc"
               ]

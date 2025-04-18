@@ -33,6 +33,7 @@
 
 # Paraview files
 *.vtu
+*.vtk
 *.pvd
 
 # Andromeda restart files
@@ -41,6 +42,8 @@
 *.txt
 *.bin
 *.bin.*
+and.*
+!and.inp
 navodila-git
 run/mesh/ellipsoid.geo
 run/mesh/ellipsoid211-in-sphere-1024-1969-3930.msh
