@@ -26,8 +26,9 @@
 !     Variables
 !
       CHARACTER(255) parMeshDir
-      CHARACTER(255) parMeshFileName,parBiCFileName
-      CHARACTER(255) parMeshFullName,parBiCFullName
+      CHARACTER(255) parMeshFileName,parBiCFileName,parDomainMeshFileName
+      CHARACTER(255) parMeshFullName,parBiCFullName,parDomainMeshFullName
+
       INTEGER parTriInteg             ! regular triangle integration (1..5)
       INTEGER parTriRecur             ! singular triangle integration (number of recursive steps)
       INTEGER parQuadIntegSing        ! singular quad integration (1..8)
@@ -64,7 +65,8 @@
       CHARACTER(255) parInputFileName
       CHARACTER(255) parResultsFileName,parStochasticFileName
       CHARACTER(255) parInitialFileName,parResultsWallName,parResultsForceErr
-      CHARACTER(255) parLogFileName,parIntegralsFileName
+      CHARACTER(255) parLogFileName,parIntegralsFileName,parDomainResultsFileName
+      character(255) parDomainOpenFOAMResultsFileName
       INTEGER parYes,parNo
       CHARACTER(255) parLogTekst,parFromAllSidesFileName
       CHARACTER(255) parPPFileName,parRstFileName
@@ -72,6 +74,7 @@
 
       INTEGER parOutInit
       INTEGER parOutMesh
+      INTEGER parDomainExport
       INTEGER parOutStoc,parOutPiec
 
       INTEGER parQinw
@@ -94,6 +97,8 @@
       PARAMETER (parStochasticFileName="and.stochastic.txt")
       PARAMETER (parFromAllSidesFileName="and.fromAllSides.txt")
       PARAMETER (parInitialFileName="and.initial.vtu")
+      PARAMETER (parDomainResultsFileName="and.domain.vtu")
+      PARAMETER (parDomainOpenFOAMResultsFileName="and.U")
       PARAMETER (parLogFileName="and.log")
       PARAMETER (parRstFileName="and.rst")
       PARAMETER (parPPFileName="and.linePP.txt")
@@ -137,7 +142,7 @@ subroutine defineKeys()
 !
 !     Keywords
 !
-  parNOkeys=30
+  parNOkeys=31
   allocate (parKey(parNOkeys))
   allocate (parKeyDesc(parNOkeys))
   parKey(1)="MDIR"
@@ -200,8 +205,8 @@ subroutine defineKeys()
   parKeyDesc(29)="LIS library solver settings, i.e. -i bicg -p none -tol 1.0e-8 -maxiter 1000"   
   parKey(30)="SLET"
   parKeyDesc(30)="SLE type, choose: LIS, LISfull, CRS, FULL "   
-
-
+  parKey(31)="LDOM"
+  parKeyDesc(31)="parDomainMeshFileName - name of the 3D mesh file (*.msh)."
 end subroutine
 
 
@@ -250,6 +255,7 @@ end subroutine
       parWriteIntegrals = parYes
       parOutRest = parYes
       parConserveMemory = parNo
+      parDomainExport = parNo
 
       parMeshFileName="cyl-1.msh"
       parBiCFileName="cyl-prevod.bic"
@@ -412,6 +418,10 @@ end subroutine
           if (Cstring(dummy,"LISFULL").EQ.parYes) parSLEtype = parLISfull     
           if (Cstring(dummy,"CRS").EQ.parYes) parSLEtype = parCRS
           if (Cstring(dummy,"CRSFULL").EQ.parYes) parSLEtype = parFULL
+        ELSE IF (KeyWord.EQ.parKey(31)) THEN ! LDOM
+          READ(OneLine,'(A5,A)') dummy,parDomainMeshFileName
+          parDomainExport = parYes    
+               
         END IF
 
         CALL rOneTL(lun,OneLine)
@@ -423,6 +433,7 @@ end subroutine
 !
       WRITE (parMeshFullName,'(A,A)') TRIM(parMeshDir),TRIM(parMeshFileName)
       WRITE (parBiCFullName,'(A,A)') TRIM(parMeshDir),TRIM(parBiCFileName)
+      IF (parDomainExport .EQ. parYes) WRITE (parDomainMeshFullName,'(A,A)') TRIM(parMeshDir),TRIM(parDomainMeshFileName)
 
       RETURN
 
