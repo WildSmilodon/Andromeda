@@ -7,6 +7,7 @@ SUBROUTINE pressureStokesLIS()
    USE mEqns
    USE mPar
    USE mCommon
+   USE parallel
    IMPLICIT NONE
 #include "lisf.h"    
  

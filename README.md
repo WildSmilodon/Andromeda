@@ -97,3 +97,55 @@ Run
 To have access to a folder from inside docker
 
 ```docker run -v $(pwd)/my_files:/workspace/data -it andromeda```
+
+
+### Local installation of LIS and BLAS libaries & GMSH
+
+Prepare local library folder
+```
+mkdir $HOME/local
+```
+
+OpenBLAS:
+```
+wget https://github.com/xianyi/OpenBLAS/archive/refs/tags/v0.3.27.tar.gz
+tar -xvzf v0.3.27.tar.gz
+cd OpenBLAS-0.3.27
+make
+make PREFIX=$HOME/local install
+```
+
+LIS Library:
+```
+wget https://www.ssisc.org/lis/dl/lis-2.1.10.zip
+unzip lis-2.1.10.zip
+cd lis-2.1.10/
+./configure --enable-mpi --enable-f90 --prefix=$HOME/local
+make
+make install
+```
+
+Update library path in ```.bashrc``` 
+
+on Linux
+```
+export LD_LIBRARY_PATH=$HOME/local/lib:$LD_LIBRARY_PATH
+```
+
+on MacOS
+```
+export LIBRARY_PATH=$HOME/local/lib:$LIBRARY_PATH
+```
+
+
+In ```Makefile``` modify the libraries to
+```
+LDOPTO = -L$(HOME)/local/lib  -llis -lopenblas 
+```
+
+GMSH installation
+
+```
+pip install --user gmsh
+export PATH=$HOME/.local/bin:$PATH
+```

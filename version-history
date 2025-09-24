@@ -48,3 +48,7 @@
              resolved bug in pressure solution when using tri meshes
 
   - 1.7   :  Makefile update, build folder
+
+  - 1.8   :  added export of domain values in text format (and.domain.txt) based on a list (keyword DLIS)
+             added export of domain values in msh format (and.domain.vtu) based on domain mesh (keywork LDOM)
+             removed edited LIS header file, now using LIS library as is

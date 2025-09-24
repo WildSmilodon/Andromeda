@@ -480,7 +480,7 @@ SUBROUTINE stokesFormCRSsysMrhsM()
   USE mCommon
   IMPLICIT NONE
 
-  integer sysMnnz,rhsMnnz
+  integer(8) sysMnnz,rhsMnnz
 
   INTEGER row,mywall,isd,i,r,col,bc,een
   REAL(rk), ALLOCATABLE :: sysMrow(:),rhsMrow(:)

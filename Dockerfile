@@ -37,7 +37,7 @@ RUN git clone https://github.com/WildSmilodon/Andromeda.git
 
 # Compile Andromeda
 RUN cd Andromeda/src && make
-RUN cp Andromeda/bin/Andromeda bin/Andromeda-1.7-o
+RUN cd Andromeda/src && make install
 
 # Default command to start a bash shell
 CMD ["/bin/bash"]

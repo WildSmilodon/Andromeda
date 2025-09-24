@@ -1,3 +1,39 @@
+! ----------------------------------------------------------------------
+!
+SUBROUTINE ReadDomainList(fname)
+!
+! ----------------------------------------------------------------------
+  USE mPar
+  USE mDomainMesh
+
+  IMPLICIT NONE
+            
+  CHARACTER*(*) fname
+  CHARACTER(255) OneLine
+  INTEGER lun
+  INTEGER i
+
+  lun=11
+
+  OPEN (unit=lun,file=TRIM(fname),status="OLD",ERR=10)
+
+  CALL rOneTL(lun,OneLine)
+  READ(Oneline,*) DMnnodes
+  ALLOCATE (DMnode(DMnnodes))
+
+  DO i=1,DMnnodes
+    CALL rOneTL(lun,OneLine)
+    READ(Oneline,*) DMnode(i)%x(1),DMnode(i)%x(2),DMnode(i)%x(3)
+  END DO
+  
+  RETURN
+  
+10  CALL WriteToLog("Error :: ReadDomainList :: could not open domain list file!")
+  CALL StopProgram
+
+END SUBROUTINE
+
+
 
 ! ----------------------------------------------------------------------
 !
@@ -29,7 +65,7 @@ SUBROUTINE ReadDomainMesh(fname)
         if (meshType.EQ."volume") then
           CALL ReadGMSHv4Volume(fname)
         else
-          CALL WriteToLog("Error :: could not read domain mesh file!")
+          CALL WriteToLog("Error :: ReadDomainMesh :: could not read domain mesh file!")
           CALL StopProgram
         end if
       else
@@ -40,7 +76,7 @@ SUBROUTINE ReadDomainMesh(fname)
       RETURN
   
   
-      10  CALL WriteToLog("Error :: could not open domain mesh file!")
+      10  CALL WriteToLog("Error :: ReadDomainMesh :: could not open domain mesh file!")
         CALL StopProgram
 
 
@@ -59,31 +95,48 @@ SUBROUTINE ReadMesh(fname)
     INTEGER lun
     REAL(rk) version
     character(20) meshType
+    logical success
           
         
     lun=11
+
+
+    success = .false.
       
     OPEN (unit=lun,file=TRIM(fname),status="OLD",ERR=10)
     CALL rOneTL(lun,OneLine)
+
+    IF (trim(OneLine).EQ."andromedaMesh") THEN
+      CALL rOneTL(lun,OneLine)
+      READ(Oneline,*) version
+      CLOSE(lun)
+      CALL ReadAndromedaMesh(fname)
+      success = .true.
+    END IF
+
     IF (trim(OneLine).EQ."$MeshFormat") THEN
       CALL rOneTL(lun,OneLine)
       READ(Oneline,*) version
       CLOSE(lun)
       IF (version < 4.0_rk) then
         CALL ReadGMSHv2(fname)
+        success = .true.
       else
         CALL getMeshTypev4(fname,meshType)
         if (meshType.EQ."surface") then
           CALL ReadGMSHv4Surface(fname)
+          success = .true.
         else
-          CALL WriteToLog("Error :: invalid surface mesh file!")
-          CALL StopProgram
+          success = .false.
         end if
       end if
-    ELSE
-      CALL ReadVTKmesh(fname)
     END IF
-   
+
+    IF (.NOT.success) then
+      CALL WriteToLog("Error :: invalid surface mesh file!")
+      CALL StopProgram
+    end if
+    
   !
   !     Transform mesh (rotation, stretching, translation)
   !
@@ -97,7 +150,7 @@ SUBROUTINE ReadMesh(fname)
   !     Get mesh extents, output to log file.
   !
     CALL MeshGetExtents()
-  
+
     RETURN
   
   
@@ -109,7 +162,7 @@ SUBROUTINE ReadMesh(fname)
 
 ! ----------------------------------------------------------------------
 !
-  SUBROUTINE ReadVTKmesh(fname)
+  SUBROUTINE ReadAndromedaMesh(fname)
 !
 ! ----------------------------------------------------------------------
   USE mMesh
@@ -118,10 +171,69 @@ SUBROUTINE ReadMesh(fname)
   IMPLICIT NONE
 
   CHARACTER*(*) fname
+  INTEGER lun,n,i,j,l,dummy
+  CHARACTER(255) OneLine
 
-  CALL WriteToLog("Reading VTK mesh: "//trim(fname))
-  CALL WriteToLog("Error :: VTK mesh reader not implemented yet!")
-  CALL StopProgram()
+  CALL WriteToLog("Reading Andromeda mesh: "//trim(fname))
+
+  lun=11
+      
+  !
+  !     remember mesh name
+  !
+  meshName = fname
+
+  OPEN (unit=lun,file=TRIM(fname),status="OLD")
+    CALL rOneTL(lun,OneLine) 
+    CALL rOneTL(lun,OneLine)  
+
+    ! WALLS
+    CALL rOneTL(lun,OneLine)
+    READ(Oneline,*) n
+    CALL InitWall(n)
+    DO i=1,nofw
+      CALL rOneTL(lun,OneLine)
+      READ(Oneline,*) wall(i)%id,wall(i)%name
+    END DO
+
+
+    ! NODES
+    CALL rOneTL(lun,OneLine)
+    READ(Oneline,*) n
+    CALL InitNodes(n)
+    DO i=1,nnodes
+      CALL rOneTL(lun,OneLine)
+      READ(Oneline,*) j,node(j)%x(1),node(j)%x(2),node(j)%x(3)
+    END DO    
+
+    ! ELEMENTS
+    CALL rOneTL(lun,OneLine)
+    READ(Oneline,*) n
+    CALL initElement(n)
+    DO i=1,nelem
+      CALL rOneTL(lun,OneLine)
+      ! (faceID surfaceID faceType(3or4) node1 node2 node3 ?node4? )
+      READ(Oneline,*) j,element(j)%bcid,element(j)%nno
+      ! determine element type and number of nodes per element
+      IF ( element(j)%nno.EQ.3 ) THEN ! three node triangle
+        element(j)%type = 2 ! three node triangle
+      ELSE IF (element(j)%nno.EQ.4) THEN 
+        element(j)%type = 3 ! four node Quadrangle
+      ELSE
+        CALL WriteToLog("Error :: ReadAndromedaMesh :: Element type not supported!")
+        CALL StopProgram
+      END IF
+      ! allocate connectivity
+      ALLOCATE(element(j)%con(element(j)%nno))
+      READ(Oneline,*) dummy,dummy,dummy,(element(j)%con(l),l=1,element(j)%nno)
+    END DO
+
+    !DO i=1,nelem
+    !  print *, "Element ",i,": type=",element(i)%type," nno=",element(i)%nno," bcid=",element(i)%bcid, " con ",(element(i)%con(l),l=1,element(i)%nno)
+    !end do
+
+  CLOSE(lun)
+
 END SUBROUTINE
                   
 

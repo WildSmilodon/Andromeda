@@ -283,7 +283,7 @@ SUBROUTINE countStokesSysRhsMatrices(sysMnnz,rhsMnnz)
 
   INTEGER row,mywall,isd,i,r,col,bc,een
   REAL(rk), ALLOCATABLE :: sysMrow(:),rhsMrow(:)
-  integer sysMnnz,rhsMnnz
+  integer(8) sysMnnz,rhsMnnz
 
   sysMnnz = 0
   rhsMnnz = 0

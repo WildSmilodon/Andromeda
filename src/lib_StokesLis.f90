@@ -173,7 +173,8 @@ SUBROUTINE verifyLISintegrals(integralsAvailable)
   USE parallel
   USE plis
   IMPLICIT NONE
-      
+  
+  include "mpif.h"
 
   INTEGER, PARAMETER :: lun = 12
   CHARACTER(255) fileName

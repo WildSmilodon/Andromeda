@@ -715,7 +715,7 @@
 
 
       ELSE
-        CALL WriteToLog("Error :: Element type not supported!")
+        CALL WriteToLog("Error :: CalElementArea :: Element type not supported!")
       END IF
 
       END

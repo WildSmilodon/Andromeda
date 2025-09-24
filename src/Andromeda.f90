@@ -12,15 +12,11 @@ program Andromeda
       USE GaussIntegration
       USE Triangle     
 !
-!     Include LIS library header file
-!                  
-#include "lisf.h" 
-!
 !     Name and version of the code
 !
       parIDname='Andromeda'
       parIDversion='1.8' 
-      parIDdate='April 2025'
+      parIDdate='September 2025'
 !
 !     Init parallel environment
 !      
@@ -55,6 +51,7 @@ program Andromeda
       CALL CalQMesh()
 !     Consider domain mesh if available
       IF (parDomainExport.EQ.parYes) CALL ReadDomainMesh(parDomainMeshFullName)
+      IF (parDomainList.EQ.parYes) CALL ReadDomainList(parDomainListFullName)
 !
 !     Write mesh stats to log file
 !
@@ -123,7 +120,7 @@ program Andromeda
 !     Calculate domain results
 !            
       IF (parDomainExport.EQ.parYes) THEN 
-            CALL WriteToLog("Calculate values in the domain ...")
+            CALL WriteToLog("Calculate values in the domain based on domain mesh ...")
             call calculateDomainValues()
             CALL WriteToLog("Write domain results in and.domain.vtu ...")
             IF (amIroot) CALL OutputDomainMeshParaview()
@@ -131,6 +128,12 @@ program Andromeda
             IF (amIroot) CALL OutputOpenFOAM() 
             IF (amIroot) CALL OutputOpenFOAMc()            
       END IF
+      IF (parDomainList.EQ.parYes) THEN 
+            CALL WriteToLog("Calculate values in the domain based on point list ...")
+            call calculateDomainValuesList()
+            CALL WriteToLog("Write domain results in and.domain.txt ...")
+            IF (amIroot) CALL OutputDomainList()         
+      END IF      
 !
 !     Close log files & stop program
 !

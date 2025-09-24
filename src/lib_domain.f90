@@ -391,6 +391,75 @@
       END SUBROUTINE
 
 
+SUBROUTINE calculateDomainValuesList()
+
+  use mDomainData
+  use mDomainMesh
+  use parallel
+  use mPar
+
+  implicit none
+
+  include "mpif.h"
+  integer i,ierr
+  real(rk), allocatable :: local_ddN(:,:),global_ddN(:,:)
+  real(rk) :: Point(3),v(3),p
+
+  !
+  ! Init domain data arrays
+  !
+  ddnN = 4 ! number of domain nodal data sets (u,v,w,p)    
+  allocate( ddN(ddnN) )
+  ddN(1)%name = "u"
+  ddN(2)%name = "v"
+  ddN(3)%name = "w"
+  ddN(4)%name = "p"  
+  do i = 1,ddnN
+      ddN(i)%n = DMnnodes
+      allocate(ddN(i)%val(ddN(i)%n))
+      ddN(i)%val = 0.0_rk
+  end do
+
+  !
+  !  arrrays for parallel summation
+  !
+  allocate(local_ddN (4,DMnnodes))
+  allocate(global_ddN(4,DMnnodes))
+  local_ddN = 0.0_rk
+  global_ddN = 0.0_rk
+  !
+  ! Loop over points in the list
+  !
+  do i = 1,DMnnodes
+
+    Point(1) = DMnode(i)%x(1)
+    Point(2) = DMnode(i)%x(2)
+    Point(3) = DMnode(i)%x(3)
+    
+    ! and calculate the velocity and pressure at that point using the GetStokesDV subroutine
+    CALL GetStokesDV(Point,v,p,ierr)
+
+    local_ddN(1,i) = v(1)
+    local_ddN(2,i) = v(2)
+    local_ddN(3,i) = v(3) 
+    local_ddN(4,i) = p
+  end do
+
+  CALL MPI_ALLREDUCE(local_ddN, global_ddN, 4 * DMnnodes, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, ierr)
+
+  ! Store the final summed values
+  do i = 1,DMnnodes
+    ddN(1)%val(i) = global_ddN(1,i)
+    ddN(2)%val(i) = global_ddN(2,i)
+    ddN(3)%val(i) = global_ddN(3,i)
+    ddN(4)%val(i) = global_ddN(4,i)
+  end do
+
+  deallocate(local_ddN,global_ddN)  
+
+END SUBROUTINE
+
+
 SUBROUTINE calculateDomainValues()
 
   use mDomainData
@@ -398,6 +467,8 @@ SUBROUTINE calculateDomainValues()
   use parallel
   use mPar
   implicit none
+
+  include "mpif.h"
   real(rk) :: Point(3),v(3),p
   real(rk), allocatable :: local_ddE(:,:),global_ddE(:,:)
   integer :: i,n1,n2,n3,n4,ierr

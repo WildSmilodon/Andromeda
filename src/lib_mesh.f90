@@ -965,6 +965,7 @@ SUBROUTINE CalFunctionIntegralWalls(u,name)
 !     Calculate element area
 !
       DO i=1,nelem
+        !print *, "Element ",i,": type=",element(i)%type," nno=",element(i)%nno," bcid=",element(i)%bcid, " con ",(element(i)%con(l),l=1,element(i)%nno)
         CALL CalElementArea(element(i))
       END DO
 !
@@ -2191,6 +2192,43 @@ SUBROUTINE OutputOpenFOAMc()
       CLOSE (itp)
   END
   
+
+
+! -----------------------------------------------------------------------------
+
+SUBROUTINE OutputDomainList()
+
+  !
+  !     $: Outputs data on domain mesh
+  !
+  ! -----------------------------------------------------------------------------
+        USE mDomainMesh
+        USE mDomainData
+        USE mPar
+        IMPLICIT NONE
+  
+        INTEGER itp,i
+        CHARACTER*255 vrstica
+  
+        itp=96
+  
+        OPEN (itp,FILE=TRIM(parDomainListResultsFileName),STATUS='UNKNOWN')
+  
+        WRITE (itp,'(A)') "#"
+        WRITE (itp,'(A)') "# Domain values"
+        WRITE (itp,'(A)') "#"
+        WRITE (itp,'(A)') "# Number of values"
+        WRITE (itp,'(I0)') DMnnodes
+        WRITE (itp,'(A)') "#"
+        WRITE (itp,'(8A)') "# x  y  z  ", trim(ddN(1)%name)," ",trim(ddN(2)%name)," ",trim(ddN(3)%name)," ",trim(ddN(4)%name)
+        DO  i=1,DMnnodes
+          WRITE (vrstica,'(7G18.9)') DMnode(i)%x(1),DMnode(i)%x(2),DMnode(i)%x(3),ddN(1)%val(i),ddN(2)%val(i),ddN(3)%val(i),ddN(4)%val(i)
+          CALL sqblnk(itp,vrstica)
+        END DO
+
+        close(itp)   
+  END
+
 
 
 ! -----------------------------------------------------------------------------

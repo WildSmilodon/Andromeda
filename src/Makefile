@@ -1,9 +1,10 @@
 # Program name and version
 PROGRAM = Andromeda
-VERSION = 1.7
+VERSION = 1.8
 
 # Directories
 INST_DIR = $(HOME)/bin
+LIS_DIR = $(HOME)/Library/lis
 SRC_DIR = .
 BIN_DIR = ../bin
 BUILD_DIR = ../build
@@ -19,8 +20,7 @@ FC = mpif90
 OPT = -O3
 OPDE= o 
 
-
-FCOPTS = -ffixed-line-length-132 -fcray-pointer -cpp -DUSE_MPI -I../inc
+FCOPTS = -ffixed-line-length-132 -fcray-pointer -cpp -DUSE_MPI -I$(LIS_DIR)/include
 FLAGS = -J$(BUILD_DIR) # Store .mod files in build directory
 
 # Source files
@@ -41,9 +41,7 @@ FIXOBJ = $(patsubst %.f,$(BUILD_DIR)/%.o,$(SFIX))
 F90OBJ = $(patsubst %.f90,$(BUILD_DIR)/%.o,$(SF90))
 
 # Libraries
-#LDOPTO = -lblas -llis
-LDOPTO = -lblas  /Users/ravnik/Library/lis/lib/liblis.a
-
+LDOPTO = -L$(LIS_DIR)/lib -llis -lblas
 
 # Default target
 all: $(BUILD_DIR) program
