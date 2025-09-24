@@ -1,23 +1,22 @@
 module parallel
 
    implicit none
-   
-   include "mpif.h"
-#include "lisf.h"       
-      
+   private
+
+#include "lisf.h"
+
    TYPE paralelEnv
       INTEGER ierr
       LIS_INTEGER comm
       INTEGER nProcs
       INTEGER myRank
    END TYPE
-    
+
    TYPE(paralelEnv) env  ! paralel environment
    LOGICAL amIroot
-   
+   public :: par_init, par_finalize, env, amIroot, paralelEnv
+contains
 
-   contains 
-    
    ! ----------------------------------------------------------------------------
    subroutine par_init()
   

@@ -5,6 +5,7 @@ module plis
    use mPar
    implicit none
  
+   private
 #include "lisf.h" 
     
    TYPE systemLinEq
@@ -26,13 +27,32 @@ module plis
 
    END TYPE
 
+   public :: systemLinEq
+   public :: plis_setup_A, plis_setup_bx, plis_setup_Abx
+   public :: plis_set_matrix_element, plis_set_matrix_element_check
+   public :: plis_assemble_system_matrix, plis_assemble_system_matrix_csr
+   public :: plis_set_RHSmatrix_element, plis_init_rhs_matrix
+   public :: plis_solve
+   public :: plis_get_solver_status, plis_get_solver_iterations
+   public :: plis_get_solver_name, plis_get_solver_time
+   public :: plis_createSolver
+   public :: plis_get_nnz
+   public :: plis_cleanup
+   public :: plis_getX
+   public :: plis_is_row_mine
+   public :: plis_fill_121
+   public :: plis_rhs_matvec
+   public :: plis_print_system_matrix
+
+   
+
    contains 
 
 
 
 
    ! ----------------------------------------------------------------------------      
-    subroutine plis_print_system_matrix(sle)
+   subroutine plis_print_system_matrix(sle)
 
       TYPE(systemLinEq) sle 
       integer i,j

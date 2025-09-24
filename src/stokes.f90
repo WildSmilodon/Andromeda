@@ -170,3 +170,28 @@ subroutine solveStokes()
       END IF      
 
 end subroutine      
+
+subroutine printMemoryUsage()
+      use iso_c_binding
+      implicit none
+      integer(c_long) :: rss
+      character(len=256) :: line
+      integer :: ios
+      rss = 0
+
+      ! Try to read memory usage from /proc/self/statm (Linux only)
+      open(unit=99, file="/proc/self/statm", status="old", action="read", iostat=ios)
+      if (ios == 0) then
+            read(99, *, iostat=ios) rss
+            close(99)
+            if (ios == 0) then
+                  ! rss is in pages, convert to MB
+                  rss = rss * 4096 / 1048576
+                  write(*,*) "Current memory usage (approx, MB): ", rss
+                  return
+            end if
+      end if
+
+      ! If not Linux or failed, print a warning
+      write(*,*) "Memory usage reporting not supported on this platform."
+end subroutine printMemoryUsage

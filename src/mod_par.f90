@@ -26,8 +26,8 @@
 !     Variables
 !
       CHARACTER(255) parMeshDir
-      CHARACTER(255) parMeshFileName,parBiCFileName,parDomainMeshFileName
-      CHARACTER(255) parMeshFullName,parBiCFullName,parDomainMeshFullName
+      CHARACTER(255) parMeshFileName,parBiCFileName,parDomainMeshFileName,parDomainListFileName
+      CHARACTER(255) parMeshFullName,parBiCFullName,parDomainMeshFullName,parDomainListFullName
 
       INTEGER parTriInteg             ! regular triangle integration (1..5)
       INTEGER parTriRecur             ! singular triangle integration (number of recursive steps)
@@ -65,7 +65,7 @@
       CHARACTER(255) parInputFileName
       CHARACTER(255) parResultsFileName,parStochasticFileName
       CHARACTER(255) parInitialFileName,parResultsWallName,parResultsForceErr
-      CHARACTER(255) parLogFileName,parIntegralsFileName,parDomainResultsFileName
+      CHARACTER(255) parLogFileName,parIntegralsFileName,parDomainResultsFileName,parDomainListResultsFileName
       character(255) parDomainOpenFOAMResultsFileName
       INTEGER parYes,parNo
       CHARACTER(255) parLogTekst,parFromAllSidesFileName
@@ -74,7 +74,7 @@
 
       INTEGER parOutInit
       INTEGER parOutMesh
-      INTEGER parDomainExport
+      INTEGER parDomainExport, parDomainList
       INTEGER parOutStoc,parOutPiec
 
       INTEGER parQinw
@@ -98,6 +98,7 @@
       PARAMETER (parFromAllSidesFileName="and.fromAllSides.txt")
       PARAMETER (parInitialFileName="and.initial.vtu")
       PARAMETER (parDomainResultsFileName="and.domain.vtu")
+      PARAMETER (parDomainListResultsFileName="and.domain.txt")
       PARAMETER (parDomainOpenFOAMResultsFileName="and.U")
       PARAMETER (parLogFileName="and.log")
       PARAMETER (parRstFileName="and.rst")
@@ -142,7 +143,7 @@ subroutine defineKeys()
 !
 !     Keywords
 !
-  parNOkeys=31
+  parNOkeys=32
   allocate (parKey(parNOkeys))
   allocate (parKeyDesc(parNOkeys))
   parKey(1)="MDIR"
@@ -206,7 +207,9 @@ subroutine defineKeys()
   parKey(30)="SLET"
   parKeyDesc(30)="SLE type, choose: LIS, LISfull, CRS, FULL "   
   parKey(31)="LDOM"
-  parKeyDesc(31)="parDomainMeshFileName - name of the 3D mesh file (*.msh)."
+  parKeyDesc(31)="parDomainMeshFileName - filename of the 3D mesh file (*.msh)."
+  parKey(32)="DLIS"
+  parKeyDesc(32)="parDomainListFileName - filename of the list of domain x y z locations."  
 end subroutine
 
 
@@ -256,6 +259,7 @@ end subroutine
       parOutRest = parYes
       parConserveMemory = parNo
       parDomainExport = parNo
+      parDomainList = parNo
 
       parMeshFileName="cyl-1.msh"
       parBiCFileName="cyl-prevod.bic"
@@ -421,7 +425,10 @@ end subroutine
         ELSE IF (KeyWord.EQ.parKey(31)) THEN ! LDOM
           READ(OneLine,'(A5,A)') dummy,parDomainMeshFileName
           parDomainExport = parYes    
-               
+        ELSE IF (KeyWord.EQ.parKey(32)) THEN ! DLIS
+          READ(OneLine,'(A5,A)') dummy,parDomainListFileName
+          parDomainList = parYes   
+          
         END IF
 
         CALL rOneTL(lun,OneLine)
@@ -434,6 +441,12 @@ end subroutine
       WRITE (parMeshFullName,'(A,A)') TRIM(parMeshDir),TRIM(parMeshFileName)
       WRITE (parBiCFullName,'(A,A)') TRIM(parMeshDir),TRIM(parBiCFileName)
       IF (parDomainExport .EQ. parYes) WRITE (parDomainMeshFullName,'(A,A)') TRIM(parMeshDir),TRIM(parDomainMeshFileName)
+      IF (parDomainList .EQ. parYes) WRITE (parDomainListFullName,'(A,A)') TRIM(parMeshDir),TRIM(parDomainListFileName)
+      IF (parDomainExport .EQ. parYes.AND. parDomainList .EQ. parYes) then 
+        CALL WriteToLog("Error :: ReadParameters :: Domain export mesh and list can not be used simultaneously.")
+        CALL StopProgram()
+      end if
+
 
       RETURN
 
